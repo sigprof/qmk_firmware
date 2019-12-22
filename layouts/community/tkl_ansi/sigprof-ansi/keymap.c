@@ -43,61 +43,65 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /*
      * Function layer:
      * - numeric keypad emulation
+     * - media keys
      */
     /*
      * ┌───┐   ┌───┬───┬───┬───┐ ┌───┬───┬───┬───┐ ┌───┬───┬───┬───┐ ┌───┬───┬───┐
      * │   │   │   │   │   │   │ │   │   │   │   │ │   │   │   │   │ │   │NLk│   │
      * └───┘   └───┴───┴───┴───┘ └───┴───┴───┴───┘ └───┴───┴───┴───┘ └───┴───┴───┘
      * ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───────┐ ┌───┬───┬───┐
-     * │   │   │   │   │   │   │   │P7 │P8 │P9 │P/ │   │   │       │ │   │   │   │
+     * │   │   │   │   │   │   │   │P7 │P8 │P9 │P/ │   │   │       │ │Ply│   │   │
      * ├───┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─────┤ ├───┼───┼───┤
-     * │     │   │   │   │   │   │   │P4 │P5 │P6 │P* │   │   │     │ │   │   │   │
+     * │     │   │   │   │   │   │   │P4 │P5 │P6 │P* │   │   │     │ │Mut│   │   │
      * ├─────┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴─────┤ └───┴───┴───┘
      * │      │   │   │   │   │   │   │P1 │P2 │P3 │P- │   │ PEnter │
      * ├──────┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴────────┤     ┌───┐
-     * │ Shift  │   │   │   │   │   │   │P0 │   │P. │P+ │    Shift │     │   │
+     * │ Shift  │   │   │   │   │   │   │P0 │   │P. │P+ │    Shift │     │V+ │
      * ├────┬───┴┬──┴─┬─┴───┴───┴───┴───┴───┴──┬┴───┼───┴┬────┬────┤ ┌───┼───┼───┐
-     * │Ctrl│GUI │Alt │         Adjust         │ Alt│ GUI│ApFn│Ctrl│ │   │   │   │
+     * │Ctrl│GUI │Alt │         Adjust         │ Alt│ GUI│ApFn│Ctrl│ │Prv│V- │Nxt│
      * └────┴────┴────┴────────────────────────┴────┴────┴────┴────┘ └───┴───┴───┘
      */
     [_FN] = LAYOUT_tkl_ansi(
         XXXXXXX,          XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,    XXXXXXX, KC_NLCK, XXXXXXX,
 
-        XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_P7,   KC_P8,   KC_P9,   KC_PSLS, XXXXXXX, XXXXXXX, XXXXXXX,    XXXXXXX, XXXXXXX, XXXXXXX,
-        XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_P4,   KC_P5,   KC_P6,   KC_PAST, XXXXXXX, XXXXXXX, XXXXXXX,    XXXXXXX, XXXXXXX, XXXXXXX,
+        XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_P7,   KC_P8,   KC_P9,   KC_PSLS, XXXXXXX, XXXXXXX, XXXXXXX,    KC_MPLY, XXXXXXX, XXXXXXX,
+        XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_P4,   KC_P5,   KC_P6,   KC_PAST, XXXXXXX, XXXXXXX, XXXXXXX,    KC_MUTE, XXXXXXX, XXXXXXX,
         XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_P1,   KC_P2,   KC_P3,   KC_PMNS, XXXXXXX,          KC_PENT,
-        _______,          XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_P0,   XXXXXXX, KC_PDOT, KC_PPLS,          _______,             XXXXXXX,
-        _______, _______, _______,                            US_ADJ ,                            _______, _______, _______, _______,    XXXXXXX, XXXXXXX, XXXXXXX
+        _______,          XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_P0,   XXXXXXX, KC_PDOT, KC_PPLS,          _______,             KC_VOLU,
+        _______, _______, _______,                            US_ADJ ,                            _______, _______, _______, _______,    KC_MPRV, KC_VOLD, KC_MNXT
     ),
 
     /*
      * Adjust layer:
      * - backlight control
      * - RGB underglow control
+     * - reset to bootloader
+     * - EEPROM reset
+     * - NKRO config
      */
     /*
      * ┌───┐   ┌───┬───┬───┬───┐ ┌───┬───┬───┬───┐ ┌───┬───┬───┬───┐ ┌───┬───┬───┐
-     * │   │   │   │   │   │   │ │   │   │   │   │ │   │   │   │   │ │   │   │   │
+     * │Rst│   │   │   │   │   │ │   │   │   │   │ │   │   │   │   │ │   │   │   │
      * └───┘   └───┴───┴───┴───┘ └───┴───┴───┴───┘ └───┴───┴───┴───┘ └───┴───┴───┘
      * ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───────┐ ┌───┬───┬───┐
-     * │   │   │   │   │   │   │   │   │   │   │   │   │   │       │ │   │   │   │
+     * │   │   │   │   │   │   │   │   │   │   │   │NK-│NK+│EEReset│ │   │   │   │
      * ├───┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─────┤ ├───┼───┼───┤
      * │     │BTg│BL-│BL+│BBr│   │   │   │   │   │   │   │   │     │ │   │   │   │
      * ├─────┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴─────┤ └───┴───┴───┘
-     * │      │UTg│UM+│UH+│US+│UV+│   │   │   │   │   │   │        │
+     * │      │UTg│UM+│UH+│US+│UV+│Sp+│   │   │   │   │   │        │
      * ├──────┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴────────┤     ┌───┐
-     * │ Shift  │UMP│UM-│UH-│US-│UV-│   │   │   │   │   │    Shift │     │   │
+     * │ Shift  │UMP│UM-│UH-│US-│UV-│Sp-│   │   │   │   │    Shift │     │   │
      * ├────┬───┴┬──┴─┬─┴───┴───┴───┴───┴───┴──┬┴───┼───┴┬────┬────┤ ┌───┼───┼───┐
      * │Ctrl│GUI │Alt │         Adjust         │ Alt│ GUI│ApFn│Ctrl│ │   │   │   │
      * └────┴────┴────┴────────────────────────┴────┴────┴────┴────┘ └───┴───┴───┘
      */
     [_ADJUST] = LAYOUT_tkl_ansi(
-        XXXXXXX,          XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,    XXXXXXX, XXXXXXX, XXXXXXX,
+        RESET  ,          XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, NK_OFF , NK_ON  , EEP_RST,    XXXXXXX, XXXXXXX, XXXXXXX,
 
         XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,    XXXXXXX, XXXXXXX, XXXXXXX,
         XXXXXXX, BL_TOGG, BL_DEC , BL_INC , BL_BRTG, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,    XXXXXXX, XXXXXXX, XXXXXXX,
-        XXXXXXX, RGB_TOG, RGB_MOD, RGB_HUI, RGB_SAI, RGB_VAI, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          XXXXXXX,
-        _______,          RGB_M_P, RGB_RMOD,RGB_HUD, RGB_SAD, RGB_VAD, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          _______,             XXXXXXX,
+        XXXXXXX, RGB_TOG, RGB_MOD, RGB_HUI, RGB_SAI, RGB_VAI, RGB_SPI, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          XXXXXXX,
+        _______,          RGB_M_P, RGB_RMOD,RGB_HUD, RGB_SAD, RGB_VAD, RGB_SPD, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          _______,             XXXXXXX,
         _______, _______, _______,                            _______,                            _______, _______, _______, _______,    XXXXXXX, XXXXXXX, XXXXXXX
     ),
 };
