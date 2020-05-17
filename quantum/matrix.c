@@ -89,7 +89,7 @@ static void init_pins(void) {
     }
 }
 
-static bool read_cols_on_row(matrix_row_t current_matrix[], uint8_t current_row) {
+static bool __attribute__(( optimize(3) )) read_cols_on_row(matrix_row_t current_matrix[], uint8_t current_row) {
     // Start with a clear matrix row
     matrix_row_t current_row_value = 0;
 
@@ -139,7 +139,7 @@ static void init_pins(void) {
     }
 }
 
-static bool read_rows_on_col(matrix_row_t current_matrix[], uint8_t current_col) {
+static bool __attribute__(( optimize(3) )) read_rows_on_col(matrix_row_t current_matrix[], uint8_t current_col) {
     bool matrix_changed = false;
 
     // Select col and wait for col selecton to stabilize
