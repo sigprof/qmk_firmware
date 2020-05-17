@@ -16,4 +16,6 @@ NKRO_ENABLE = yes            # Enable N-Key Rollover
 RGBLIGHT_ENABLE = yes        # Enable keyboard RGB underglow
 BACKLIGHT_ENABLE = yes       # Enable underkey LED backlight
 
+LTO_ENABLE = yes
+
 DEFAULT_FOLDER = idobao/id80/v2/ansi
