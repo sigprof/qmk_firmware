@@ -78,13 +78,30 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     /*
      * Numeric keypad emulation layer.
+     *
+     * The layout is like on old ThinkPad keyboards (which apparently conform
+     * to ISO/IEC 9995-2:2009 Amendment 1:2012), but with some hopefully useful
+     * additions:
+     *
+     * - The whole digit row is mapped to numpad keys, except the “0” key
+     *   (which is specified to be mapped to the numpad slash); however, an
+     *   extra “0” key is provided to the left of the “1” key.
+     *
+     * - The usual “-” and “+” keys are mapped to their numpad equivalents
+     *   (although that “+” key usually sends the equal sign, for the numpad
+     *   emulation purpose a more commonly supported “+” mapping is chosen).
+     *
+     * - The numpad equal sign key is on the apostrophe/double quote key.
+     *
+     * - The backslash key is mapped to Num Lock.
+     *
      * Unused alphanumeric keys are turned off.
      */
     [_NUMPAD] = LAYOUT(
         _______,   _______, _______, _______, _______,   _______, _______, _______, _______,   _______, _______, _______, _______,    _______,   _______,
-        XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_P7,   KC_P8,   KC_P9,   KC_PSLS, XXXXXXX, XXXXXXX, _______,            _______,
+        KC_P0,   KC_P1,   KC_P2,   KC_P3,   KC_P4,   KC_P5,   KC_P6,   KC_P7,   KC_P8,   KC_P9,   KC_PSLS, KC_PMNS, KC_PPLS, _______,            _______,
         _______,     XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_P4,   KC_P5,   KC_P6,   KC_PAST, XXXXXXX, XXXXXXX, KC_NLCK,        _______,
-        _______,       XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_P1,   KC_P2,   KC_P3,   KC_PMNS, XXXXXXX, KC_PENT,
+        _______,       XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_P1,   KC_P2,   KC_P3,   KC_PMNS, KC_PEQL, KC_PENT,
         _______,            XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_P0,   XXXXXXX, KC_PDOT, KC_PPLS, _______,          _______,
         _______,   _______,   _______,                      _______,                              _______,     _______,        _______, _______, _______
     ),
