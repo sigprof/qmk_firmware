@@ -24,6 +24,7 @@ enum layer_names {
 
 #define U_FCAPS LT(_FN, KC_CAPS)
 #define U_FAPP  LT(_FN, KC_APP)
+#define U_MONUM MO(_NUMPAD)
 #define U_MOADJ MO(_ADJUST)
 #define U_TGNUM TG(_NUMPAD)
 #define U_OSRGU OSM(MOD_RGUI)
@@ -95,12 +96,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * - one-shot RCtrl and RGUI
      * - Num Lock key
      * - toggle number pad emulation layer
+     * - momentary switch for the number pad emulation layer (because of layer
+     *   ordering, using that switch requires releasing the key which was used
+     *   to switch to the function layer)
      * - media keys
      */
     [_FN] = LAYOUT(
         XXXXXXX,   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,    KC_HOME,   KC_END,
         KC_GRV,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  KC_DEL,             U_CPGUP,
-        XXXXXXX,     KC_BTN1, KC_MS_U, KC_BTN2, KC_WH_U, XXXXXXX, KC_INS,  KC_HOME, KC_UP,   KC_END,  KC_PGUP, KC_VOLU, KC_MUTE, U_TGNUM,        U_CPGDN,
+        U_MONUM,     KC_BTN1, KC_MS_U, KC_BTN2, KC_WH_U, XXXXXXX, KC_INS,  KC_HOME, KC_UP,   KC_END,  KC_PGUP, KC_VOLU, KC_MUTE, U_TGNUM,        U_CPGDN,
         _______,       KC_MS_L, KC_MS_D, KC_MS_R, KC_WH_D, XXXXXXX, KC_DEL,  KC_LEFT, KC_DOWN, KC_RGHT, KC_PGDN, KC_VOLD, KC_PENT,
         _______,            KC_BTN3, KC_BTN4, KC_BTN5, KC_WH_L, KC_WH_R, KC_PSCR, KC_SLCK, KC_PAUS, U_OSRGU, U_OSRCT, _______,          KC_PGUP,
         _______,   _______,   _______,                      U_MOADJ,                              _______,     _______,        KC_HOME, KC_PGDN, KC_END  
