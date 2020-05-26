@@ -19,6 +19,7 @@ enum layer_names {
     _QWERTY,
     _NUMPAD,
     _FN,
+    _FN_ALT,
     _ADJUST,
 };
 
@@ -31,6 +32,7 @@ enum layer_names {
 #define U_OSRCT OSM(MOD_RCTL)
 #define U_CPGUP RCTL(KC_PGUP)
 #define U_CPGDN RCTL(KC_PGDN)
+#define U_FNALT LM(_FN_ALT, MOD_LALT)
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /*
@@ -121,10 +123,25 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_FN] = LAYOUT(
         XXXXXXX,   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,    KC_HOME,   KC_END,
         KC_GRV,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  KC_DEL,             U_CPGUP,
-        U_MONUM,     KC_BTN1, KC_MS_U, KC_BTN2, KC_WH_U, XXXXXXX, KC_INS,  KC_HOME, KC_UP,   KC_END,  KC_PGUP, KC_VOLU, KC_MUTE, U_TGNUM,        U_CPGDN,
-        _______,       KC_MS_L, KC_MS_D, KC_MS_R, KC_WH_D, XXXXXXX, KC_DEL,  KC_LEFT, KC_DOWN, KC_RGHT, KC_PGDN, KC_VOLD, KC_PENT,
+        U_MONUM,     KC_BTN1, KC_MS_U, KC_BTN2, KC_WH_U, DM_PLY1, KC_INS,  KC_HOME, KC_UP,   KC_END,  KC_PGUP, KC_VOLU, KC_MUTE, U_TGNUM,        U_CPGDN,
+        _______,       KC_MS_L, KC_MS_D, KC_MS_R, KC_WH_D, DM_PLY2, KC_DEL,  KC_LEFT, KC_DOWN, KC_RGHT, KC_PGDN, KC_VOLD, KC_PENT,
         _______,            KC_BTN3, KC_BTN4, KC_BTN5, KC_WH_L, KC_WH_R, KC_PSCR, KC_SLCK, KC_PAUS, U_OSRGU, U_OSRCT, _______,          KC_PGUP,
-        _______,   _______,   _______,                      U_MOADJ,                              _______,     _______,        KC_HOME, KC_PGDN, KC_END  
+        _______,   _______,   U_FNALT,                      U_MOADJ,                              _______,     _______,        KC_HOME, KC_PGDN, KC_END
+    ),
+
+    /*
+     * Fn+Alt layer - dynamic macro management:
+     * - Fn+Alt+Esc - stop recording;
+     * - Fn+Alt+T   - start recording macro 1;
+     * - Fn+Alt+G   - start recording macro 2.
+     */
+    [_FN_ALT] = LAYOUT(
+        DM_RSTP,   _______, _______, _______, _______,   _______, _______, _______, _______,   _______, _______, _______, _______,    _______,   _______,
+        _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______,
+        _______,     _______, _______, _______, _______, DM_REC1, _______, _______, _______, _______, _______, _______, _______, _______,        _______,
+        _______,       _______, _______, _______, _______, DM_REC2, _______, _______, _______, _______, _______, _______, _______,
+        _______,            _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______,
+        _______,   _______,   _______,                      _______,                              _______,     _______,        _______, _______, _______
     ),
 
     /*
