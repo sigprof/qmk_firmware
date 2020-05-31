@@ -1,3 +1,9 @@
+// Change the product ID to avoid the Linux-specific VIA bug (if a keyboard
+// with the supported VID:PID but a non-VIA firmware is connected, the app
+// becomes very slow to respond).
+#undef PRODUCT_ID
+#define PRODUCT_ID      0x8080
+
 // Measure the matrix scan rate and report it in the debug console.
 #define DEBUG_MATRIX_SCAN_RATE
 
