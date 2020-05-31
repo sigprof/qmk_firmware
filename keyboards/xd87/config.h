@@ -219,3 +219,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define LCD_E_PIN        1            //< pin  for Enable line
 #endif
 */
+
+/* Storage size for VIA layout options */
+#define VIA_EEPROM_LAYOUT_OPTIONS_SIZE 2
