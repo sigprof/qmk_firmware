@@ -7,6 +7,10 @@ enum layer_names {
     _ADJUST,
 };
 
+enum custom_keycode {
+    U_TEST1 = SAFE_RANGE,
+};
+
 #define US_APP  LT(_FN, KC_APP)
 #define US_ADJ  MO(_ADJUST)
 #define US_TGNP TG(_NUMPAD)
@@ -106,7 +110,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      */
     [_FN] = LAYOUT_tkl_ansi(
     /* ┌───────┐       ┌───────┬───────┬───────┬───────┐   ┌───────┬───────┬───────┬───────┐   ┌───────┬───────┬───────┬───────┐ ┌───────┬───────┬───────┐ */
-        XXXXXXX        ,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX    ,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX    ,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX  ,XXXXXXX,KC_NLCK,XXXXXXX,
+        XXXXXXX        ,U_TEST1,XXXXXXX,XXXXXXX,XXXXXXX    ,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX    ,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX  ,XXXXXXX,KC_NLCK,XXXXXXX,
     /* └───────┘       └───────┴───────┴───────┴───────┘   └───────┴───────┴───────┴───────┘   └───────┴───────┴───────┴───────┘ └───────┴───────┴───────┘ */
 
     /* ┌───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────────────┐ ┌───────┬───────┬───────┐ */
@@ -156,3 +160,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, _______, _______,                            _______,                            _______, _______, _______, _______,    XXXXXXX, XXXXXXX, XXXXXXX
     ),
 };
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case U_TEST1:
+            if (record->event.pressed) {
+                add_key(KC_1);
+                add_key(KC_2);
+            } else {
+                del_key(KC_1);
+                del_key(KC_2);
+            }
+            send_keyboard_report();
+            break;
+    }
+    return true;
+}
