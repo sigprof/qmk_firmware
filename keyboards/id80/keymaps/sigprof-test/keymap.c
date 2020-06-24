@@ -26,7 +26,7 @@ enum layer_names {
 #define U_FCAPS LT(_FN, KC_CAPS)
 #define U_FAPP  LT(_FN, KC_APP)
 #define U_MONUM MO(_NUMPAD)
-#define U_MOADJ MO(_ADJUST)
+#define U_MOADJ OSL(_ADJUST) //MO(_ADJUST)
 #define U_TGNUM TG(_NUMPAD)
 #define U_OSRGU OSM(MOD_RGUI)
 #define U_OSRCT OSM(MOD_RCTL)
@@ -161,5 +161,26 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______,   _______,   _______,                      _______,                              _______,     _______,        XXXXXXX, XXXXXXX, XXXXXXX
     ),
 };
+
+bool get_clear_oneshot_layer(uint16_t keycode, keyrecord_t *record, bool default_value) {
+    switch (keycode) {
+        case RGB_TOG:
+        case RGB_MOD:
+        case RGB_HUI:
+        case RGB_SAI:
+        case RGB_VAI:
+        case RGB_SPI:
+            return false;
+
+        case RGB_M_P:
+        case RGB_RMOD:
+        case RGB_HUD:
+        case RGB_SAD:
+        case RGB_VAD:
+        case RGB_SPD:
+            return true;
+    }
+    return default_value;
+}
 
 /* vim:set sw=4 sta et: */
