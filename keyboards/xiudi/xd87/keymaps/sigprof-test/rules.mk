@@ -8,3 +8,6 @@ MOUSEKEY_ENABLE = yes
 # Enable RGB underglow (for some reason this is disabled in the default
 # configuration for this keyboard).
 RGBLIGHT_ENABLE = yes
+
+# Enable NKRO (also disabled in the default configuration).
+NKRO_ENABLE = yes
