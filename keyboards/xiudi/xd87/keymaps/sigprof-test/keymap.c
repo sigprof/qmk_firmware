@@ -156,3 +156,29 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, _______, _______,                            _______,                            _______, _______, _______, _______,    XXXXXXX, XXXXXXX, XXXXXXX
     ),
 };
+
+static bool esc_pressed = false;
+static uint16_t esc_timer;
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case KC_ESC:
+            if (record->event.pressed) {
+                esc_pressed = true;
+                esc_timer = timer_read();
+            } else {
+                esc_pressed = false;
+            }
+            break;
+    }
+    return true;
+}
+
+void matrix_scan_user(void) {
+    if (esc_pressed) {
+        if (timer_elapsed(esc_timer) >= 1000) {
+            esc_pressed = false;
+            unregister_code(KC_ESC);
+        }
+    }
+}
