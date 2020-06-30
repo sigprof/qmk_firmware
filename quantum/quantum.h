@@ -19,7 +19,6 @@
 #    include <avr/pgmspace.h>
 #    include <avr/io.h>
 #    include <avr/interrupt.h>
-#    include <util/atomic.h>
 #endif
 #if defined(PROTOCOL_CHIBIOS)
 #    include "hal.h"
@@ -187,35 +186,65 @@ extern layer_state_t layer_state;
 #if defined(__AVR__)
 typedef uint8_t pin_t;
 
-#    define GPIO_FORCE_PRECOMPUTE(var) asm volatile("" : : "g"(var));
-#    define GPIO_BARRIER() asm volatile("")
+#    define GPIO_PORT_OP(port_addr, op, arg) \
+    do { \
+        uint8_t sreg_save; \
+        asm volatile("  in      %0,__SREG__\n" \
+                     "  cli\n" \
+                     "  ld      __tmp_reg__,%a1\n" \
+                     "  " op "  __tmp_reg__,%2\n" \
+                     "  st      %a1,__tmp_reg__\n" \
+                     "  out     __SREG__,%0\n" \
+                     : /* %0 */ "=&r" (sreg_save) \
+                     : /* %1 */ "e" (port_addr), \
+                       /* %2 */ "r" (arg)); \
+    } while(0)
+
+#    define GPIO_DDR_OP(port_addr, op, arg) \
+    do { \
+        uint8_t sreg_save; \
+        asm volatile("  in      %0,__SREG__\n" \
+                     "  cli\n" \
+                     "  ld      __tmp_reg__,-%a1\n" \
+                     "  " op "  __tmp_reg__,%2\n" \
+                     "  st      %a1+,__tmp_reg__\n" \
+                     "  out     __SREG__,%0\n" \
+                     : /* %0 */ "=&r" (sreg_save) \
+                     : /* %1 */ "e" (port_addr), \
+                       /* %2 */ "r" (arg)); \
+    } while(0)
+
+#    define GPIO_REG_PAIR_OP(port_addr, ddr_op, ddr_arg, port_op, port_arg) \
+    do { \
+        uint8_t sreg_save; \
+        asm volatile("  in      %0,__SREG__\n" \
+                     "  cli\n" \
+                     "  ld      __tmp_reg__,-%a1\n" \
+                     "  " ddr_op " __tmp_reg__,%2\n" \
+                     "  st      %a1+,__tmp_reg__\n" \
+                     "  ld      __tmp_reg__,%a1\n" \
+                     "  " port_op " __tmp_reg__,%3\n" \
+                     "  st      %a1,__tmp_reg__\n" \
+                     "  out     __SREG__,%0\n" \
+                     : /* %0 */ "=&r" (sreg_save) \
+                     : /* %1 */ "e" (port_addr), \
+                       /* %2 */ "r" (ddr_arg), \
+                       /* %3 */ "r" (port_arg)); \
+    } while(0)
 
 #    define setPinInput(pin) \
     (__extension__({ \
-        volatile uint8_t *ddr = &DDRx_ADDRESS(pin); \
         volatile uint8_t *port = &PORTx_ADDRESS(pin); \
         uint8_t inv_mask = (uint8_t)~_BV((pin) & 0xF); \
-        GPIO_FORCE_PRECOMPUTE(inv_mask); \
-        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { \
-            *ddr &= inv_mask; \
-            *port &= inv_mask; \
-        } \
-        GPIO_BARRIER(); \
+        GPIO_REG_PAIR_OP(port, "and", inv_mask, "and", inv_mask); \
     }))
 
 #    define setPinInputHigh(pin) \
     (__extension__({ \
-        volatile uint8_t *ddr = &DDRx_ADDRESS(pin); \
         volatile uint8_t *port = &PORTx_ADDRESS(pin); \
         uint8_t mask = _BV((pin) & 0xF); \
         uint8_t inv_mask = (uint8_t)~mask; \
-        GPIO_FORCE_PRECOMPUTE(mask); \
-        GPIO_FORCE_PRECOMPUTE(inv_mask); \
-        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { \
-            *ddr &= inv_mask; \
-            *port |= mask; \
-        } \
-        GPIO_BARRIER(); \
+        GPIO_REG_PAIR_OP(port, "and", inv_mask, "or", mask); \
     }))
 
 #    define setPinInputLow(pin) _Static_assert(0, "AVR processors cannot implement an input as pull low")
@@ -227,13 +256,9 @@ typedef uint8_t pin_t;
                 asm volatile("sbi %0,%1" : : "I"(_SFR_IO_ADDR(DDRx_ADDRESS(pin))), "I"((pin) & 0xF)); \
             } \
         } else { \
-            volatile uint8_t *ddr = &DDRx_ADDRESS(pin); \
+            volatile uint8_t *port = &PORTx_ADDRESS(pin); \
             uint8_t mask = _BV((pin) & 0xF); \
-            GPIO_FORCE_PRECOMPUTE(mask); \
-            ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { \
-                *ddr |= mask; \
-            } \
-            GPIO_BARRIER(); \
+            GPIO_DDR_OP(port, "or", mask); \
         } \
     }))
 
@@ -246,11 +271,7 @@ typedef uint8_t pin_t;
         } else { \
             volatile uint8_t *port = &PORTx_ADDRESS(pin); \
             uint8_t mask = _BV((pin) & 0xF); \
-            GPIO_FORCE_PRECOMPUTE(mask); \
-            ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { \
-                *port |= mask; \
-            } \
-            GPIO_BARRIER(); \
+            GPIO_PORT_OP(port, "or", mask); \
         } \
     }))
 
@@ -263,11 +284,7 @@ typedef uint8_t pin_t;
         } else { \
             volatile uint8_t *port = &PORTx_ADDRESS(pin); \
             uint8_t inv_mask = (uint8_t)~_BV((pin) & 0xF); \
-            GPIO_FORCE_PRECOMPUTE(inv_mask); \
-            ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { \
-                *port &= inv_mask; \
-            } \
-            GPIO_BARRIER(); \
+            GPIO_PORT_OP(port, "and", inv_mask); \
         } \
     }))
 
@@ -279,11 +296,7 @@ typedef uint8_t pin_t;
     (__extension__({ \
         volatile uint8_t *port = &PORTx_ADDRESS(pin); \
         uint8_t mask = _BV((pin) & 0xF); \
-        GPIO_FORCE_PRECOMPUTE(mask); \
-        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { \
-            *port ^= mask; \
-        } \
-        GPIO_BARRIER(); \
+        GPIO_PORT_OP(port, "eor", mask); \
     }))
 
 
