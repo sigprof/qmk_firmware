@@ -214,7 +214,7 @@ typedef uint8_t pin_t;
                        /* %2 */ "r" (arg)); \
     } while(0)
 
-#    define GPIO_REG_PAIR_OP(port_addr, ddr_op, ddr_arg, port_op, port_arg) \
+#    define GPIO_DDR_PORT_OP(port_addr, ddr_op, ddr_arg, port_op, port_arg) \
     do { \
         uint8_t sreg_save; \
         asm volatile("  in      %0,__SREG__\n" \
@@ -232,33 +232,33 @@ typedef uint8_t pin_t;
                        /* %3 */ "r" (port_arg)); \
     } while(0)
 
-#define GPIO_DDR_PORT_CONST_OP(pin, ddr_op, port_op) \
+#    define GPIO_DDR_PORT_CONST_OP(pin, ddr_op, port_op) \
     asm volatile("      in      __tmp_reg__,__SREG__\n" \
                  "      cli\n" \
-                 "    " ddr_op " %0,%2\n" \
+                 "    " ddr_op  " %0,%2\n" \
                  "    " port_op " %1,%2\n" \
                  "      out     __SREG__,__tmp_reg__\n" \
                  : \
-                 : "I" (_SFR_IO_ADDR(DDRx_ADDRESS(pin))), \
-                   "I" (_SFR_IO_ADDR(PORTx_ADDRESS(pin))), \
-                   "I" ((pin) & 0xF))
+                 : /* %0 */ "I" (_SFR_IO_ADDR(DDRx_ADDRESS(pin))), \
+                   /* %1 */ "I" (_SFR_IO_ADDR(PORTx_ADDRESS(pin))), \
+                   /* %2 */ "I" ((pin) & 0xF))
 
 #    define setPinInput(pin) \
     (__extension__({ \
-        if (__builtin_constant_p(pin)) { \
+        if (__builtin_constant_p((pin))) { \
             if (((pin) & 0xF) <= 7) { \
                 GPIO_DDR_PORT_CONST_OP((pin), "cbi", "cbi"); \
             } \
         } else { \
             volatile uint8_t *port = &PORTx_ADDRESS(pin); \
             uint8_t inv_mask = (uint8_t)~_BV((pin) & 0xF); \
-            GPIO_REG_PAIR_OP(port, "and", inv_mask, "and", inv_mask); \
+            GPIO_DDR_PORT_OP(port, "and", inv_mask, "and", inv_mask); \
         } \
     }))
 
 #    define setPinInputHigh(pin) \
     (__extension__({ \
-        if (__builtin_constant_p(pin)) { \
+        if (__builtin_constant_p((pin))) { \
             if (((pin) & 0xF) <= 7) { \
                 GPIO_DDR_PORT_CONST_OP((pin), "cbi", "sbi"); \
             } \
@@ -266,7 +266,7 @@ typedef uint8_t pin_t;
             volatile uint8_t *port = &PORTx_ADDRESS(pin); \
             uint8_t mask = _BV((pin) & 0xF); \
             uint8_t inv_mask = (uint8_t)~mask; \
-            GPIO_REG_PAIR_OP(port, "and", inv_mask, "or", mask); \
+            GPIO_DDR_PORT_OP(port, "and", inv_mask, "or", mask); \
         } \
     }))
 
