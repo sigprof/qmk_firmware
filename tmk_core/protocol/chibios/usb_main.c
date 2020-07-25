@@ -164,14 +164,11 @@ static const USBEndpointConfig shared_ep_config = {
 typedef struct {
     size_t              queue_capacity_in;
     size_t              queue_capacity_out;
-    USBInEndpointState  in_ep_state;
-    USBOutEndpointState out_ep_state;
-    USBInEndpointState  int_ep_state;
     USBEndpointConfig   in_ep_config;
     USBEndpointConfig   out_ep_config;
     USBEndpointConfig   int_ep_config;
     const QMKUSBConfig  config;
-    QMKUSBDriver        driver;
+    QMKUSBDriver        *driver;
 } usb_driver_config_t;
 
 /* Reusable initialization structure - see USBEndpointConfig comment at top of file */
@@ -186,7 +183,7 @@ typedef struct {
                 NULL,                  /* OUT notification callback */                                                      \
                 stream##_EPSIZE,       /* IN maximum packet size */                                                         \
                 0,                     /* OUT maximum packet size */                                                        \
-                NULL,                  /* IN Endpoint state */                                                              \
+                &(USBInEndpointState){}, /* IN Endpoint state */                                                            \
                 NULL,                  /* OUT endpoint state */                                                             \
                 2,                     /* IN multiplier */                                                                  \
                 NULL                   /* SETUP buffer (not a SETUP endpoint) */                                            \
@@ -200,7 +197,7 @@ typedef struct {
                 0,                  /* IN maximum packet size */                                                            \
                 stream##_EPSIZE,    /* OUT maximum packet size */                                                           \
                 NULL,               /* IN Endpoint state */                                                                 \
-                NULL,               /* OUT endpoint state */                                                                \
+                &(USBOutEndpointState){}, /* OUT endpoint state */                                                          \
                 2,                  /* IN multiplier */                                                                     \
                 NULL,               /* SETUP buffer (not a SETUP endpoint) */                                               \
             },                                                                                                              \
@@ -212,7 +209,7 @@ typedef struct {
                 NULL,                       /* OUT notification callback */                                                 \
                 CDC_NOTIFICATION_EPSIZE,    /* IN maximum packet size */                                                    \
                 0,                          /* OUT maximum packet size */                                                   \
-                NULL,                       /* IN Endpoint state */                                                         \
+                &(USBInEndpointState){},    /* IN Endpoint state */                                                         \
                 NULL,                       /* OUT endpoint state */                                                        \
                 2,                          /* IN multiplier */                                                             \
                 NULL,                       /* SETUP buffer (not a SETUP endpoint) */                                       \
@@ -229,7 +226,8 @@ typedef struct {
             .fixed_size  = fixedsize,                                                                                       \
             .ib          = (__attribute__((aligned(4))) uint8_t[BQ_BUFFER_SIZE(stream##_IN_CAPACITY, stream##_EPSIZE)]){},  \
             .ob          = (__attribute__((aligned(4))) uint8_t[BQ_BUFFER_SIZE(stream##_OUT_CAPACITY, stream##_EPSIZE)]){}, \
-        }                                                                                                                   \
+        },                                                                                                                  \
+        .driver = &(QMKUSBDriver){},                                                                                        \
     }
 
 typedef struct {
@@ -252,7 +250,7 @@ typedef struct {
     };
 } usb_driver_configs_t;
 
-static usb_driver_configs_t drivers = {
+static const usb_driver_configs_t drivers = {
 #ifdef CONSOLE_ENABLE
 #    define CONSOLE_IN_CAPACITY 4
 #    define CONSOLE_OUT_CAPACITY 4
@@ -317,7 +315,7 @@ static void usb_event_cb(USBDriver *usbp, usbevent_t event) {
                 if (drivers.array[i].config.int_in) {
                     usbInitEndpointI(usbp, drivers.array[i].config.int_in, &drivers.array[i].int_ep_config);
                 }
-                qmkusbConfigureHookI(&drivers.array[i].driver);
+                qmkusbConfigureHookI(drivers.array[i].driver);
             }
             osalSysUnlockFromISR();
             return;
@@ -332,7 +330,7 @@ static void usb_event_cb(USBDriver *usbp, usbevent_t event) {
             for (int i = 0; i < NUM_USB_DRIVERS; i++) {
                 chSysLockFromISR();
                 /* Disconnection event on suspend.*/
-                qmkusbSuspendHookI(&drivers.array[i].driver);
+                qmkusbSuspendHookI(drivers.array[i].driver);
                 chSysUnlockFromISR();
             }
             return;
@@ -342,7 +340,7 @@ static void usb_event_cb(USBDriver *usbp, usbevent_t event) {
             for (int i = 0; i < NUM_USB_DRIVERS; i++) {
                 chSysLockFromISR();
                 /* Disconnection event on suspend.*/
-                qmkusbWakeupHookI(&drivers.array[i].driver);
+                qmkusbWakeupHookI(drivers.array[i].driver);
                 chSysUnlockFromISR();
             }
             suspend_wakeup_init();
@@ -520,7 +518,7 @@ static void usb_sof_cb(USBDriver *usbp) {
     kbd_sof_cb(usbp);
     osalSysLockFromISR();
     for (int i = 0; i < NUM_USB_DRIVERS; i++) {
-        qmkusbSOFHookI(&drivers.array[i].driver);
+        qmkusbSOFHookI(drivers.array[i].driver);
     }
     osalSysUnlockFromISR();
 }
@@ -538,10 +536,7 @@ static const USBConfig usbcfg = {
  */
 void init_usb_driver(USBDriver *usbp) {
     for (int i = 0; i < NUM_USB_DRIVERS; i++) {
-        QMKUSBDriver *driver                     = &drivers.array[i].driver;
-        drivers.array[i].in_ep_config.in_state   = &drivers.array[i].in_ep_state;
-        drivers.array[i].out_ep_config.out_state = &drivers.array[i].out_ep_state;
-        drivers.array[i].int_ep_config.in_state  = &drivers.array[i].int_ep_state;
+        QMKUSBDriver *driver                     = drivers.array[i].driver;
         qmkusbObjectInit(driver, &drivers.array[i].config);
         qmkusbStart(driver, &drivers.array[i].config);
     }
@@ -764,7 +759,7 @@ void send_consumer(uint16_t data) { (void)data; }
 int8_t sendchar(uint8_t c) {
     // The previous implmentation had timeouts, but I think it's better to just slow down
     // and make sure that everything is transferred, rather than dropping stuff
-    return chnWrite(&drivers.console_driver.driver, &c, 1);
+    return chnWrite(drivers.console_driver.driver, &c, 1);
 }
 
 // Just a dummy function for now, this could be exposed as a weak function
@@ -778,7 +773,7 @@ void console_task(void) {
     uint8_t buffer[CONSOLE_EPSIZE];
     size_t  size = 0;
     do {
-        size_t size = chnReadTimeout(&drivers.console_driver.driver, buffer, sizeof(buffer), TIME_IMMEDIATE);
+        size_t size = chnReadTimeout(drivers.console_driver.driver, buffer, sizeof(buffer), TIME_IMMEDIATE);
         if (size > 0) {
             console_receive(buffer, size);
         }
@@ -803,7 +798,7 @@ void raw_hid_send(uint8_t *data, uint8_t length) {
     if (length != RAW_EPSIZE) {
         return;
     }
-    chnWrite(&drivers.raw_driver.driver, data, length);
+    chnWrite(drivers.raw_driver.driver, data, length);
 }
 
 __attribute__((weak)) void raw_hid_receive(uint8_t *data, uint8_t length) {
@@ -816,7 +811,7 @@ void raw_hid_task(void) {
     uint8_t buffer[RAW_EPSIZE];
     size_t  size = 0;
     do {
-        size_t size = chnReadTimeout(&drivers.raw_driver.driver, buffer, sizeof(buffer), TIME_IMMEDIATE);
+        size_t size = chnReadTimeout(drivers.raw_driver.driver, buffer, sizeof(buffer), TIME_IMMEDIATE);
         if (size > 0) {
             raw_hid_receive(buffer, size);
         }
@@ -827,17 +822,17 @@ void raw_hid_task(void) {
 
 #ifdef MIDI_ENABLE
 
-void send_midi_packet(MIDI_EventPacket_t *event) { chnWrite(&drivers.midi_driver.driver, (uint8_t *)event, sizeof(MIDI_EventPacket_t)); }
+void send_midi_packet(MIDI_EventPacket_t *event) { chnWrite(drivers.midi_driver.driver, (uint8_t *)event, sizeof(MIDI_EventPacket_t)); }
 
 bool recv_midi_packet(MIDI_EventPacket_t *const event) {
-    size_t size = chnReadTimeout(&drivers.midi_driver.driver, (uint8_t *)event, sizeof(MIDI_EventPacket_t), TIME_IMMEDIATE);
+    size_t size = chnReadTimeout(drivers.midi_driver.driver, (uint8_t *)event, sizeof(MIDI_EventPacket_t), TIME_IMMEDIATE);
     return size == sizeof(MIDI_EventPacket_t);
 }
 void midi_ep_task(void) {
     uint8_t buffer[MIDI_STREAM_EPSIZE];
     size_t  size = 0;
     do {
-        size_t size = chnReadTimeout(&drivers.midi_driver.driver, buffer, sizeof(buffer), TIME_IMMEDIATE);
+        size_t size = chnReadTimeout(drivers.midi_driver.driver, buffer, sizeof(buffer), TIME_IMMEDIATE);
         if (size > 0) {
             MIDI_EventPacket_t event;
             recv_midi_packet(&event);
@@ -848,7 +843,7 @@ void midi_ep_task(void) {
 
 #ifdef VIRTSER_ENABLE
 
-void virtser_send(const uint8_t byte) { chnWrite(&drivers.serial_driver.driver, &byte, 1); }
+void virtser_send(const uint8_t byte) { chnWrite(drivers.serial_driver.driver, &byte, 1); }
 
 __attribute__((weak)) void virtser_recv(uint8_t c) {
     // Ignore by default
@@ -858,7 +853,7 @@ void virtser_task(void) {
     uint8_t numBytesReceived = 0;
     uint8_t buffer[16];
     do {
-        numBytesReceived = chnReadTimeout(&drivers.serial_driver.driver, buffer, sizeof(buffer), TIME_IMMEDIATE);
+        numBytesReceived = chnReadTimeout(drivers.serial_driver.driver, buffer, sizeof(buffer), TIME_IMMEDIATE);
         for (int i = 0; i < numBytesReceived; i++) {
             virtser_recv(buffer[i]);
         }
