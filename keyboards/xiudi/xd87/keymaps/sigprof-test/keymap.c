@@ -157,10 +157,22 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 };
 
+// {{{1 Test QMK timers: release Esc after it was held for 1000 ms
+//
+// This test can reveal timer skew when some code disables interrupts for a
+// longer time than the timer interrupt period; when some timer interrupts are
+// lost because of that, the actual delay before Esc is released by this code
+// becomes more than the intended 1000 ms.
+
+#define TEST_ESC_RELEASE_BY_TIMER
+
+#ifdef TEST_ESC_RELEASE_BY_TIMER
 static bool esc_pressed = false;
 static uint16_t esc_timer;
+#endif
 
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+static bool process_record_esc_release_by_timer(uint16_t keycode, keyrecord_t *record) {
+#ifdef TEST_ESC_RELEASE_BY_TIMER
     switch (keycode) {
         case KC_ESC:
             if (record->event.pressed) {
@@ -171,14 +183,31 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             break;
     }
+#endif
     return true;
 }
 
-void matrix_scan_user(void) {
+static void matrix_scan_esc_release_by_timer(void) {
+#ifdef TEST_ESC_RELEASE_BY_TIMER
     if (esc_pressed) {
         if (timer_elapsed(esc_timer) >= 1000) {
             esc_pressed = false;
             unregister_code(KC_ESC);
         }
     }
+#endif
+}
+
+// }}}1
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (!process_record_esc_release_by_timer(keycode, record)) {
+        return false;
+    }
+
+    return true;
+}
+
+void matrix_scan_user(void) {
+    matrix_scan_esc_release_by_timer();
 }
