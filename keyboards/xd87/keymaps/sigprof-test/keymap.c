@@ -7,14 +7,14 @@ enum layer_names {
     _ADJUST,
 };
 
-#define US_APP  LT(_FN, KC_APP)
-#define US_ADJ  MO(_ADJUST)
-#define US_TGNP TG(_NUMPAD)
-#define US_CAPS LT(_FN, KC_CAPS)
-#define US_OSRC OSM(MOD_RCTL)
-#define US_OSRG OSM(MOD_RGUI)
-#define US_CPGU RCTL(KC_PGUP)
-#define US_CPGD RCTL(KC_PGDN)
+#define U_FAPP  LT(_FN, KC_APP)
+#define U_MOADJ MO(_ADJUST)
+#define U_TGNUM TG(_NUMPAD)
+#define U_FCAPS LT(_FN, KC_CAPS)
+#define U_OSRCT OSM(MOD_RCTL)
+#define U_OSRGU OSM(MOD_RGUI)
+#define U_CPGUP RCTL(KC_PGUP)
+#define U_CPGDN RCTL(KC_PGDN)
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /*
@@ -49,11 +49,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /* ├───────┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───────────┤ ├───────┼───────┼───────┤ */
           KC_TAB   ,KC_Q   ,KC_W   ,KC_E   ,KC_R   ,KC_T   ,KC_Y   ,KC_U   ,KC_I   ,KC_O   ,KC_P   ,KC_LBRC,KC_RBRC,  KC_BSLS    ,KC_DEL ,KC_END ,KC_PGDN,
     /* ├───────────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴───────────┤ └───────┴───────┴───────┘ */
-           US_CAPS   ,KC_A   ,KC_S   ,KC_D   ,KC_F   ,KC_G   ,KC_H   ,KC_J   ,KC_K   ,KC_L   ,KC_SCLN,KC_QUOT,     KC_ENT                                ,
+           U_FCAPS   ,KC_A   ,KC_S   ,KC_D   ,KC_F   ,KC_G   ,KC_H   ,KC_J   ,KC_K   ,KC_L   ,KC_SCLN,KC_QUOT,     KC_ENT                                ,
     /* ├─────────────┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴─────────────────┤         ┌───────┐         */
              KC_LSFT     ,KC_Z   ,KC_X   ,KC_C   ,KC_V   ,KC_B   ,KC_N   ,KC_M   ,KC_COMM,KC_DOT ,KC_SLSH,       KC_RSFT                 ,KC_UP          ,
     /* ├─────────┬───────┴─┬─────┴───┬───┴───────┴───────┴───────┴───────┴───────┴─────┬─┴───────┼───────┴─┬─────────┬─────────┤ ┌───────┼───────┼───────┐ */
-         KC_LCTL , KC_LGUI , KC_LALT ,                     KC_SPC                      , KC_RALT , KC_RGUI , US_APP  , KC_RCTL   ,KC_LEFT,KC_DOWN,KC_RGHT
+         KC_LCTL , KC_LGUI , KC_LALT ,                     KC_SPC                      , KC_RALT , KC_RGUI , U_FAPP  , KC_RCTL   ,KC_LEFT,KC_DOWN,KC_RGHT
     /* └─────────┴─────────┴─────────┴─────────────────────────────────────────────────┴─────────┴─────────┴─────────┴─────────┘ └───────┴───────┴───────┘ */
     ),
 
@@ -110,15 +110,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /* └───────┘       └───────┴───────┴───────┴───────┘   └───────┴───────┴───────┴───────┘   └───────┴───────┴───────┴───────┘ └───────┴───────┴───────┘ */
 
     /* ┌───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────────────┐ ┌───────┬───────┬───────┐ */
-        KC_GRV ,KC_F1  ,KC_F2  ,KC_F3  ,KC_F4  ,KC_F5  ,KC_F6  ,KC_F7  ,KC_F8  ,KC_F9  ,KC_F10 ,KC_F11 ,KC_F12 ,    KC_DEL       ,XXXXXXX,XXXXXXX,US_CPGU,
+        KC_GRV ,KC_F1  ,KC_F2  ,KC_F3  ,KC_F4  ,KC_F5  ,KC_F6  ,KC_F7  ,KC_F8  ,KC_F9  ,KC_F10 ,KC_F11 ,KC_F12 ,    KC_DEL       ,XXXXXXX,XXXXXXX,U_CPGUP,
     /* ├───────┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───────────┤ ├───────┼───────┼───────┤ */
-          XXXXXXX  ,KC_BTN1,KC_MS_U,KC_BTN2,KC_WH_U,XXXXXXX,KC_INS ,KC_HOME,KC_UP  ,KC_END ,KC_PGUP,KC_VOLU,KC_MUTE,  US_TGNP    ,XXXXXXX,XXXXXXX,US_CPGD,
+          XXXXXXX  ,KC_BTN1,KC_MS_U,KC_BTN2,KC_WH_U,XXXXXXX,KC_INS ,KC_HOME,KC_UP  ,KC_END ,KC_PGUP,KC_VOLU,KC_MUTE,  U_TGNUM    ,XXXXXXX,XXXXXXX,U_CPGDN,
     /* ├───────────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴───────────┤ └───────┴───────┴───────┘ */
            _______   ,KC_MS_L,KC_MS_D,KC_MS_R,KC_WH_D,XXXXXXX,KC_DEL ,KC_LEFT,KC_DOWN,KC_RGHT,KC_PGDN,KC_VOLD,     KC_PENT                               ,
     /* ├─────────────┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴─────────────────┤         ┌───────┐         */
-             _______     ,KC_BTN3,KC_BTN4,KC_BTN5,KC_WH_L,KC_WH_R,KC_PSCR,KC_SLCK,KC_PAUS,US_OSRG,US_OSRC,       _______                 ,KC_PGUP        ,
+             _______     ,KC_BTN3,KC_BTN4,KC_BTN5,KC_WH_L,KC_WH_R,KC_PSCR,KC_SLCK,KC_PAUS,U_OSRGU,U_OSRCT,       _______                 ,KC_PGUP        ,
     /* ├─────────┬───────┴─┬─────┴───┬───┴───────┴───────┴───────┴───────┴───────┴─────┬─┴───────┼───────┴─┬─────────┬─────────┤ ┌───────┼───────┼───────┐ */
-         _______ , _______ , _______ ,                     US_ADJ                      , _______ , _______ , _______ , _______   ,KC_HOME,KC_PGDN,KC_END 
+         _______ , _______ , _______ ,                     U_MOADJ                     , _______ , _______ , _______ , _______   ,KC_HOME,KC_PGDN,KC_END
     /* └─────────┴─────────┴─────────┴─────────────────────────────────────────────────┴─────────┴─────────┴─────────┴─────────┘ └───────┴───────┴───────┘ */
     ),
 
