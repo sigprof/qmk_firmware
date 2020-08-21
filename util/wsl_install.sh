@@ -4,15 +4,6 @@ util_dir=$(dirname "$0")
 dir=$(cd -P -- "$util_dir" && pwd -P)
 pushd "$dir";
 
-if [[ $dir != /mnt/* ]];
-then
-    echo
-    echo "You need to clone the qmk_firmware repository outside the linux filesystem."
-    echo "Otherwise the windows executables can't be run."
-    exit 1
-fi
-
-
 while true; do
     echo
     echo "Do you want to install all toolchain dependencies needed for compiling QMK?"
