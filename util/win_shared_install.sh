@@ -39,7 +39,12 @@ function install_drivers {
     pushd "$download_dir"
     cp -f "$dir/drivers.txt" .
     echo
-    cmd.exe //c "qmk_driver_installer.exe $1 $2 drivers.txt"
+    if [ -n "$using_wsl" ]; then
+        chmod +x qmk_driver_installer.exe
+        powershell.exe /c "Start-Process -Wait ./qmk_driver_installer.exe \"$1 $2 drivers.txt\""
+    else
+        cmd.exe //c "qmk_driver_installer.exe $1 $2 drivers.txt"
+    fi
     popd > /dev/null
 }
 
