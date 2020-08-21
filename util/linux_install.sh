@@ -148,6 +148,7 @@ elif grep ID /etc/os-release | grep -qE "opensuse|tumbleweed"; then
 		CROSS_ARM_GCC=cross-arm-none-gcc7
 	fi
 	sudo zypper install \
+		make \
 		avr-libc \
 		clang \
 		$CROSS_AVR_GCC \
