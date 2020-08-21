@@ -48,19 +48,21 @@ else
     done
 fi
 
-while true; do
-    echo
-    echo "Do you want to add a symlink to the QMK repository in your home directory for"
-    echo "convenience? This will create a folder 'qmk_firmware' in your home directory."
-    echo "In the future you can use this folder instead of the full path on your Windows"
-    echo "file system."
-    read -p "(Y/N)? " res
-    case $res in
-        [Yy]* ) ln -sfn "$dir/.." ~/qmk_firmware; break;;
-        [Nn]* ) break;;
-        * ) echo "Invalid answer";;
-    esac
-done
+if [ "$dir" != "$HOME/qmk_firmware/util" ]; then
+    while true; do
+        echo
+        echo "Do you want to add a symlink to the QMK repository in your home directory for"
+        echo "convenience? This will create a folder 'qmk_firmware' in your home directory."
+        echo "In the future you can use this folder instead of the full path on your Windows"
+        echo "file system."
+        read -p "(Y/N)? " res
+        case $res in
+            [Yy]* ) ln -sfn "$dir/.." ~/qmk_firmware; break;;
+            [Nn]* ) break;;
+            * ) echo "Invalid answer";;
+        esac
+    done
+fi
 
 echo
 echo "******************************************************************************"
