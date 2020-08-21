@@ -18,7 +18,7 @@ done
 
 download_dir=wsl_downloaded
 
-source "$dir/win_shared_install.sh"
+source "$dir/win_shared_install.sh" --wsl
 
 pip3 install -r ${util_dir}/../requirements.txt
 
