@@ -7,7 +7,7 @@ case $(uname -a) in
 	*Darwin*)
 		exec "${util_dir}/macos_install.sh"
 	;;
-	*Linux*Microsoft*)
+	*Linux*[Mm]icrosoft*)
 		exec "${util_dir}/wsl_install.sh"
 	;;
 	*FreeBSD*)
