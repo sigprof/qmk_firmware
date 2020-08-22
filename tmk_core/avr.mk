@@ -155,7 +155,7 @@ dfu-split-right: $(BUILD_DIR)/$(TARGET).hex cpfirmware check-size
 
 define EXEC_AVRDUDE
 	USB= ;\
-	if $(GREP) -q -s Microsoft /proc/version; then \
+	if $(GREP) -q -s '[Mm]icrosoft' /proc/version; then \
 		echo 'ERROR: AVR flashing cannot be automated within the Windows Subsystem for Linux (WSL) currently. Instead, take the .hex file generated and flash it using QMK Toolbox, AVRDUDE, AVRDUDESS, or XLoader.'; \
 	else \
 		printf "Detecting USB port, reset your controller now."; \
