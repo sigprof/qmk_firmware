@@ -25,6 +25,11 @@ function install_utils {
         echo "Installing bootloadHID"
         wget 'https://www.obdev.at/downloads/vusb/bootloadHID.2012-12-08.zip'
         unzip bootloadHID.2012-12-08.zip
+
+        echo "Installing avrdude"
+        wget 'https://download.savannah.gnu.org/releases/avrdude/avrdude-6.3-mingw32.zip'
+        unzip avrdude-6.3-mingw32.zip
+        chmod +x avrdude.exe
     fi
 
     echo "Downloading the QMK driver installer"

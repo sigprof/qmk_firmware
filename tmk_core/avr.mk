@@ -156,7 +156,11 @@ dfu-split-right: $(BUILD_DIR)/$(TARGET).hex cpfirmware check-size
 define EXEC_AVRDUDE
 	USB= ;\
 	if $(GREP) -q -s '[Mm]icrosoft' /proc/version; then \
-		echo 'ERROR: AVR flashing cannot be automated within the Windows Subsystem for Linux (WSL) currently. Instead, take the .hex file generated and flash it using QMK Toolbox, AVRDUDE, AVRDUDESS, or XLoader.'; \
+		if [ -z "$(1)" ]; then \
+			powershell.exe -ExecutionPolicy Bypass -File util/Invoke-AVRDUDE.ps1 -avrdudeOptions "-p $(MCU) -c avr109 -U flash:w:$(BUILD_DIR)/$(TARGET).hex"; \
+		else \
+			powershell.exe -ExecutionPolicy Bypass -File util/Invoke-AVRDUDE.ps1 -avrdudeOptions "-p $(MCU) -c avr109 -U flash:w:$(BUILD_DIR)/$(TARGET).hex -U eeprom:w:$(QUANTUM_PATH)/split_common/$(1)"; \
+		fi \
 	else \
 		printf "Detecting USB port, reset your controller now."; \
 		TMP1=`mktemp`; \
