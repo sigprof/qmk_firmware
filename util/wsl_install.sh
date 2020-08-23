@@ -10,7 +10,7 @@ while true; do
     echo "If you don't want that, you can install the dependencies manually."
     read -p "(Y/N) " res
     case $res in
-        [Yy]* ) ./linux_install.sh; break;;
+        [Yy]* ) ./linux_install.sh --wsl; break;;
         [Nn]* ) break;;
         * ) echo "Invalid answer";;
     esac

@@ -10,6 +10,12 @@ SOLUS_INFO="Your tools are now installed. To start using them, open new terminal
 
 util_dir=$(dirname "$0")
 
+# If `--wsl` is specified, installation of some flashing tools is skipped.
+# Note that `dfu-util` needs to be installed even on WSL, because the same
+# package contains `dfu-suffix`, which is used when compiling the firmware.
+[ "${1-}" = "--wsl" ] && wsl=1 || wsl=
+[ -n "$wsl" ] && non_wsl= || non_wsl=1
+
 # For those distros that do not package bootloadHID
 install_bootloadhid() {
     if ! command -v bootloadHID >/dev/null; then
@@ -32,9 +38,9 @@ if grep ID /etc/os-release | grep -qE "fedora"; then
 		avr-libc \
 		binutils-avr32-linux-gnu \
 		clang \
-		avrdude \
+		${non_wsl:+avrdude} \
 		dfu-util \
-		dfu-programmer \
+		${non_wsl:+dfu-programmer} \
 		diffutils \
 		git \
 		gcc \
@@ -60,7 +66,7 @@ elif grep ID /etc/os-release | grep -qE 'debian|ubuntu'; then
 		binutils-arm-none-eabi \
 		binutils-avr \
 		clang-format \
-		dfu-programmer \
+		${non_wsl:+dfu-programmer} \
 		dfu-util \
 		diffutils \
 		gcc \
@@ -68,7 +74,7 @@ elif grep ID /etc/os-release | grep -qE 'debian|ubuntu'; then
 		gcc-avr \
 		git \
 		libnewlib-arm-none-eabi \
-		avrdude \
+		${non_wsl:+avrdude} \
 		libusb-dev \
 		python3 \
 		python3-pip \
@@ -82,12 +88,12 @@ elif grep ID /etc/os-release | grep -q 'arch\|manjaro'; then
 		arm-none-eabi-binutils \
 		arm-none-eabi-gcc \
 		arm-none-eabi-newlib \
-		avrdude \
+		${non_wsl:+avrdude} \
 		avr-binutils \
 		avr-libc \
 		base-devel \
 		clang \
-		dfu-programmer \
+		${non_wsl:+dfu-programmer} \
 		dfu-util \
 		diffutils \
 		gcc \
@@ -112,8 +118,8 @@ elif grep ID /etc/os-release | grep -q gentoo; then
 			app-arch/unzip \
 			app-arch/zip \
 			app-mobilephone/dfu-util \
-			dev-embedded/dfu-programmer \
-			dev-embedded/avrdude \
+			${non_wsl:+dev-embedded/dfu-programmer} \
+			${non_wsl:+dev-embedded/avrdude} \
 			net-misc/wget \
 			sys-devel/clang \
 			sys-devel/crossdev
@@ -129,8 +135,8 @@ elif grep ID /etc/os-release | grep -q sabayon; then
 		app-arch/unzip \
 		app-arch/zip \
 		app-mobilephone/dfu-util \
-		dev-embedded/dfu-programmer \
-		dev-embedded/avrdude \
+		${non_wsl:+dev-embedded/dfu-programmer} \
+		${non_wsl:+dev-embedded/avrdude} \
 		dev-lang/python \
 		net-misc/wget \
 		sys-devel/clang \
@@ -156,9 +162,9 @@ elif grep ID /etc/os-release | grep -qE "opensuse|tumbleweed"; then
 		cross-avr-binutils \
 		cross-arm-none-newlib-devel \
 		cross-arm-binutils cross-arm-none-newlib-devel \
-		avrdude \
+		${non_wsl:+avrdude} \
 		dfu-util \
-		dfu-programmer \
+		${non_wsl:+dfu-programmer} \
 		gcc \
 		libusb-devel \
 		python3 \
@@ -175,8 +181,8 @@ elif grep ID /etc/os-release | grep -q slackware; then
 			avr-binutils \
 			avr-gcc \
 			avr-libc \
-			avrdude \
-			dfu-programmer \
+			${non_wsl:+avrdude} \
+			${non_wsl:+dfu-programmer} \
 			dfu-util \
 			arm-binutils \
 			arm-gcc \
@@ -197,9 +203,9 @@ elif grep ID /etc/os-release | grep -q solus; then
 		avr-libc \
 		avr-binutils \
 		avr-gcc \
-		avrdude \
+		${non_wsl:+avrdude} \
 		dfu-util \
-		dfu-programmer \
+		${non_wsl:+dfu-programmer} \
 		libusb-devel \
 		python3 \
 		git \
@@ -216,8 +222,8 @@ elif grep ID /etc/os-release | grep -q void; then
 		cross-arm-none-eabi-binutils \
 		cross-arm-none-eabi-gcc \
 		cross-arm-none-eabi-newlib \
-		avrdude \
-		dfu-programmer \
+		${non_wsl:+avrdude} \
+		${non_wsl:+dfu-programmer} \
 		dfu-util \
 		gcc \
 		git \
@@ -234,5 +240,5 @@ else
 fi
 
 # Global install tasks
-install_bootloadhid
+[ -n "$wsl" ] || install_bootloadhid
 pip3 install --user -r ${util_dir}/../requirements.txt
