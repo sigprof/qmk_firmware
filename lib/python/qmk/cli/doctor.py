@@ -2,6 +2,7 @@
 
 Check out the user's QMK environment and make sure it's ready to compile.
 """
+import os
 import platform
 import re
 import shutil
@@ -14,9 +15,15 @@ from qmk.questions import yesno
 from qmk.commands import run
 
 ESSENTIAL_BINARIES = {
-    'dfu-programmer': {},
-    'avrdude': {},
-    'dfu-util': {},
+    'dfu-programmer': {
+        'env_var': 'DFU_PROGRAMMER'
+    },
+    'avrdude': {
+        'env_var': 'AVRDUDE'
+    },
+    'dfu-util': {
+        'env_var': 'DFU_UTIL'
+    },
     'avr-gcc': {
         'version_arg': '-dumpversion'
     },
@@ -121,7 +128,8 @@ def check_binaries():
     ok = True
 
     for binary in sorted(ESSENTIAL_BINARIES):
-        if not is_executable(binary):
+        env_var = ESSENTIAL_BINARIES[binary].get('env_var')
+        if not is_executable(binary, env_var):
             ok = False
 
     return ok
@@ -210,18 +218,26 @@ def check_modem_manager():
         cli.log.warn("Can't find systemctl to check for ModemManager.")
 
 
-def is_executable(command):
+def is_executable(command, env_var = None):
     """Returns True if command exists and can be executed.
     """
-    # Make sure the command is in the path.
-    res = shutil.which(command)
-    if res is None:
-        cli.log.error("{fg_red}Can't find %s in your path.", command)
-        return False
+    override = env_var and os.environ.get(env_var)
+    if override:
+        # Make sure that the replacement specified in the environment is usable.
+        res = shutil.which(override)
+        if res is None:
+            cli.log.error("{fg_red}Can't find %s at $%s (%s).", command, env_var, override)
+            return False
+    else:
+        # Make sure the command is in the path.
+        res = shutil.which(command)
+        if res is None:
+            cli.log.error("{fg_red}Can't find %s in your path.", command)
+            return False
 
     # Make sure the command can be executed
     version_arg = ESSENTIAL_BINARIES[command].get('version_arg', '--version')
-    check = run([command, version_arg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=5, universal_newlines=True)
+    check = run([override or command, version_arg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=5, universal_newlines=True)
 
     ESSENTIAL_BINARIES[command]['output'] = check.stdout
 
