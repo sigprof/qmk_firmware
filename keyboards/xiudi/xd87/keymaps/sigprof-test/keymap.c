@@ -17,6 +17,21 @@ enum layer_names {
 #define U_CPGUP RCTL(KC_PGUP)
 #define U_CPGDN RCTL(KC_PGDN)
 
+enum custom_keycode {
+    U_XUNDO = SAFE_RANGE,
+    U_XCUT,
+    U_XCOPY,
+    U_XPSTE,
+    U_XREDO,
+    U_XSCRU,
+    U_XSCRD,
+    U_XPANL,
+    U_XPANR,
+    U_XNKBL,
+    U_XDSAW,
+    U_XDSAA,
+};
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /*
      * Plain ANSI QWERTY keyboard, except Caps Lock and App (Menu) keys are
@@ -84,13 +99,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /* └───────┘       └───────┴───────┴───────┴───────┘   └───────┴───────┴───────┴───────┘   └───────┴───────┴───────┴───────┘ └───────┴───────┴───────┘ */
 
     /* ┌───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────────────┐ ┌───────┬───────┬───────┐ */
-        XXXXXXX,KC_P1  ,KC_P2  ,KC_P3  ,KC_P4  ,KC_P5  ,KC_P6  ,KC_P7  ,KC_P8  ,KC_P9  ,KC_P0  ,KC_PMNS,KC_PPLS,    _______      ,_______,_______,_______,
+        U_XNKBL,KC_P1  ,KC_P2  ,KC_P3  ,KC_P4  ,KC_P5  ,KC_P6  ,KC_P7  ,KC_P8  ,KC_P9  ,KC_P0  ,KC_PMNS,KC_PPLS,    _______      ,_______,_______,_______,
     /* ├───────┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───────────┤ ├───────┼───────┼───────┤ */
-          _______  ,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,KC_P4  ,KC_P5  ,KC_P6  ,KC_PAST,KC_PENT,KC_NLCK,  KC_NLCK    ,_______,_______,_______,
+          _______  ,U_XDSAW,U_XDSAA,XXXXXXX,U_XSCRU,XXXXXXX,U_XREDO,KC_P4  ,KC_P5  ,KC_P6  ,KC_PAST,KC_PENT,KC_NLCK,  KC_NLCK    ,_______,_______,_______,
     /* ├───────────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴───────────┤ └───────┴───────┴───────┘ */
-           _______   ,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,KC_P1  ,KC_P2  ,KC_P3  ,KC_PPLS,KC_PAST,     KC_PENT                               ,
+           _______   ,XXXXXXX,XXXXXXX,U_XPANL,U_XSCRD,U_XPANR,XXXXXXX,KC_P1  ,KC_P2  ,KC_P3  ,KC_PPLS,KC_PAST,     KC_PENT                               ,
     /* ├─────────────┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴─────────────────┤         ┌───────┐         */
-             _______     ,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,KC_P0  ,KC_PCMM,KC_PDOT,KC_PSLS,       _______                 ,_______        ,
+             _______     ,U_XUNDO,U_XCUT ,U_XCOPY,U_XPSTE,XXXXXXX,XXXXXXX,KC_P0  ,KC_PCMM,KC_PDOT,KC_PSLS,       _______                 ,_______        ,
     /* ├─────────┬───────┴─┬─────┴───┬───┴───────┴───────┴───────┴───────┴───────┴─────┬─┴───────┼───────┴─┬─────────┬─────────┤ ┌───────┼───────┼───────┐ */
          _______ , _______ , _______ ,                     _______                     , _______ , _______ , _______ , _______   ,_______,_______,_______
     /* └─────────┴─────────┴─────────┴─────────────────────────────────────────────────┴─────────┴─────────┴─────────┴─────────┘ └───────┴───────┴───────┘ */
@@ -221,6 +236,45 @@ bool get_permissive_hold(uint16_t keycode, keyrecord_t *record) {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (!process_record_esc_release_by_timer(keycode, record)) {
         return false;
+    }
+
+    switch (keycode) {
+        case U_XUNDO:
+            host_consumer_send(record->event.pressed ? 0x21a : 0);
+            return true;
+        case U_XCUT:
+            host_consumer_send(record->event.pressed ? 0x21c : 0);
+            return true;
+        case U_XCOPY:
+            host_consumer_send(record->event.pressed ? 0x21b : 0);
+            return true;
+        case U_XPSTE:
+            host_consumer_send(record->event.pressed ? 0x21d : 0);
+            return true;
+        case U_XREDO:
+            host_consumer_send(record->event.pressed ? 0x279 : 0);
+            return true;
+        case U_XSCRU:
+            host_consumer_send(record->event.pressed ? 0x233 : 0);
+            return true;
+        case U_XSCRD:
+            host_consumer_send(record->event.pressed ? 0x234 : 0);
+            return true;
+        case U_XPANL:
+            host_consumer_send(record->event.pressed ? 0x236 : 0);
+            return true;
+        case U_XPANR:
+            host_consumer_send(record->event.pressed ? 0x237 : 0);
+            return true;
+        case U_XNKBL:
+            host_consumer_send(record->event.pressed ? 0x29d : 0);
+            return true;
+        case U_XDSAW:
+            host_consumer_send(record->event.pressed ? 0x29f : 0);
+            return true;
+        case U_XDSAA:
+            host_consumer_send(record->event.pressed ? 0x2a2 : 0);
+            return true;
     }
 
     return true;
