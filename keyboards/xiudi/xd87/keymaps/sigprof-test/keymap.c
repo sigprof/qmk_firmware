@@ -11,6 +11,7 @@ enum layer_names {
 #define U_MOADJ MO(_ADJUST)
 #define U_TGNUM TG(_NUMPAD)
 #define U_FCAPS LT(_FN, KC_CAPS)
+#define U_NBSLS LT(_NUMPAD, KC_BSLS)
 #define U_OSRCT OSM(MOD_RCTL)
 #define U_OSRGU OSM(MOD_RGUI)
 #define U_CPGUP RCTL(KC_PGUP)
@@ -47,7 +48,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /* ┌───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────────────┐ ┌───────┬───────┬───────┐ */
         KC_GRV ,KC_1   ,KC_2   ,KC_3   ,KC_4   ,KC_5   ,KC_6   ,KC_7   ,KC_8   ,KC_9   ,KC_0   ,KC_MINS,KC_EQL ,    KC_BSPC      ,KC_INS ,KC_HOME,KC_PGUP,
     /* ├───────┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───────────┤ ├───────┼───────┼───────┤ */
-          KC_TAB   ,KC_Q   ,KC_W   ,KC_E   ,KC_R   ,KC_T   ,KC_Y   ,KC_U   ,KC_I   ,KC_O   ,KC_P   ,KC_LBRC,KC_RBRC,  KC_BSLS    ,KC_DEL ,KC_END ,KC_PGDN,
+          KC_TAB   ,KC_Q   ,KC_W   ,KC_E   ,KC_R   ,KC_T   ,KC_Y   ,KC_U   ,KC_I   ,KC_O   ,KC_P   ,KC_LBRC,KC_RBRC,  U_NBSLS    ,KC_DEL ,KC_END ,KC_PGDN,
     /* ├───────────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴───────────┤ └───────┴───────┴───────┘ */
            U_FCAPS   ,KC_A   ,KC_S   ,KC_D   ,KC_F   ,KC_G   ,KC_H   ,KC_J   ,KC_K   ,KC_L   ,KC_SCLN,KC_QUOT,     KC_ENT                                ,
     /* ├─────────────┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴─────────────────┤         ┌───────┐         */
@@ -199,6 +200,23 @@ static void matrix_scan_esc_release_by_timer(void) {
 }
 
 // }}}1
+
+bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case U_FCAPS:
+        case U_FAPP:
+            return true;
+    }
+    return false;
+}
+
+bool get_permissive_hold(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case U_NBSLS:
+            return true;
+    }
+    return false;
+}
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (!process_record_esc_release_by_timer(keycode, record)) {
