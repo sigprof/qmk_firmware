@@ -545,9 +545,9 @@ const PROGMEM uchar shared_hid_report[] = {
     0xA1, 0x01,               // Collection (Application)
     0x85, REPORT_ID_CONSUMER, //   Report ID
     0x19, 0x01,               //   Usage Minimum (Consumer Control)
-    0x2A, 0xA0, 0x02,         //   Usage Maximum (AC Desktop Show All Applications)
+    0x2A, 0xFF, 0x03,         //   Usage Maximum (as suggested in a Microsoft sample)
     0x15, 0x01,               //   Logical Minimum
-    0x26, 0xA0, 0x02,         //   Logical Maximum
+    0x26, 0xFF, 0x03,         //   Logical Maximum
     0x95, 0x01,               //   Report Count (1)
     0x75, 0x10,               //   Report Size (16)
     0x81, 0x00,               //   Input (Data, Array, Absolute)
