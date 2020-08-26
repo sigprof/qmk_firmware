@@ -7,6 +7,11 @@ enum layer_names {
     _ADJUST,
 };
 
+// RGB keycode synonyms that fit in 7 characters (ANimation type Inc/Dec).
+#define RGB_ANI RGB_MOD
+#define RGB_AND RGB_RMOD
+
+// Custom keycodes with names that fit in 7 characters.
 #define U_FAPP  LT(_FN, KC_APP)
 #define U_MOADJ MO(_ADJUST)
 #define U_TGNUM TG(_NUMPAD)
@@ -54,7 +59,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * │Ctrl│GUI │Alt │                        │ Alt│ GUI│ApFn│Ctrl│ │ ← │ ↓ │ → │
      * └────┴────┴────┴────────────────────────┴────┴────┴────┴────┘ └───┴───┴───┘
      */
-
     [_QWERTY] = LAYOUT_tkl_ansi(
     /* ┌───────┐       ┌───────┬───────┬───────┬───────┐   ┌───────┬───────┬───────┬───────┐   ┌───────┬───────┬───────┬───────┐ ┌───────┬───────┬───────┐ */
         KC_ESC         ,KC_F1  ,KC_F2  ,KC_F3  ,KC_F4      ,KC_F5  ,KC_F6  ,KC_F7  ,KC_F8      ,KC_F9  ,KC_F10 ,KC_F11 ,KC_F12   ,KC_PSCR,KC_SLCK,KC_PAUS,
@@ -92,7 +96,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * │Ctrl│GUI │Alt │                        │ Alt│ GUI│ApFn│Ctrl│ │ ← │ ↓ │ → │
      * └────┴────┴────┴────────────────────────┴────┴────┴────┴────┘ └───┴───┴───┘
      */
-
     [_NUMPAD] = LAYOUT_tkl_ansi(
     /* ┌───────┐       ┌───────┬───────┬───────┬───────┐   ┌───────┬───────┬───────┬───────┐   ┌───────┬───────┬───────┬───────┐ ┌───────┬───────┬───────┐ */
         _______        ,_______,_______,_______,_______    ,_______,_______,_______,_______    ,_______,_______,_______,_______  ,_______,_______,_______,
@@ -163,13 +166,21 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * └────┴────┴────┴────────────────────────┴────┴────┴────┴────┘ └───┴───┴───┘
      */
     [_ADJUST] = LAYOUT_tkl_ansi(
-        RESET  ,          XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, NK_OFF , NK_ON  , DEBUG  ,    XXXXXXX, XXXXXXX, XXXXXXX,
+    /* ┌───────┐       ┌───────┬───────┬───────┬───────┐   ┌───────┬───────┬───────┬───────┐   ┌───────┬───────┬───────┬───────┐ ┌───────┬───────┬───────┐ */
+        RESET          ,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX    ,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX    ,XXXXXXX,NK_OFF ,NK_ON  ,DEBUG    ,XXXXXXX,XXXXXXX,XXXXXXX,
+    /* └───────┘       └───────┴───────┴───────┴───────┘   └───────┴───────┴───────┴───────┘   └───────┴───────┴───────┴───────┘ └───────┴───────┴───────┘ */
 
-        XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, NK_TOGG, EEP_RST,    XXXXXXX, XXXXXXX, XXXXXXX,
-        XXXXXXX, BL_TOGG, BL_DEC , BL_INC , BL_BRTG, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,    XXXXXXX, XXXXXXX, XXXXXXX,
-        _______, RGB_TOG, RGB_MOD, RGB_HUI, RGB_SAI, RGB_VAI, RGB_SPI, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          XXXXXXX,
-        _______,          RGB_M_P, RGB_RMOD,RGB_HUD, RGB_SAD, RGB_VAD, RGB_SPD, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          _______,             XXXXXXX,
-        _______, _______, _______,                            _______,                            _______, _______, _______, _______,    XXXXXXX, XXXXXXX, XXXXXXX
+    /* ┌───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┬───────────────┐ ┌───────┬───────┬───────┐ */
+        XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,NK_TOGG,    EEP_RST      ,XXXXXXX,XXXXXXX,XXXXXXX,
+    /* ├───────┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───────────┤ ├───────┼───────┼───────┤ */
+          XXXXXXX  ,BL_TOGG,BL_DEC ,BL_INC ,BL_BRTG,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,  XXXXXXX    ,XXXXXXX,XXXXXXX,XXXXXXX,
+    /* ├───────────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴─┬─────┴───────────┤ └───────┴───────┴───────┘ */
+           _______   ,RGB_TOG,RGB_ANI,RGB_HUI,RGB_SAI,RGB_VAI,RGB_SPI,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,     XXXXXXX                               ,
+    /* ├─────────────┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴───┬───┴─────────────────┤         ┌───────┐         */
+             _______     ,RGB_M_P,RGB_AND,RGB_HUD,RGB_SAD,RGB_VAD,RGB_SPD,XXXXXXX,XXXXXXX,XXXXXXX,XXXXXXX,       _______                 ,XXXXXXX        ,
+    /* ├─────────┬───────┴─┬─────┴───┬───┴───────┴───────┴───────┴───────┴───────┴─────┬─┴───────┼───────┴─┬─────────┬─────────┤ ┌───────┼───────┼───────┐ */
+         _______ , _______ , _______ ,                     _______                     , _______ , _______ , _______ , _______   ,XXXXXXX,XXXXXXX,XXXXXXX
+    /* └─────────┴─────────┴─────────┴─────────────────────────────────────────────────┴─────────┴─────────┴─────────┴─────────┘ └───────┴───────┴───────┘ */
     ),
 };
 
