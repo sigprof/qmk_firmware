@@ -38,6 +38,12 @@ enum layer_names {
 #define U_CPGUP RCTL(KC_PGUP)
 #define U_CPGDN RCTL(KC_PGDN)
 
+// Hijack the keycode range formerly used by FUNC(n) to send the specified
+// usage from the Consumer page (there are lots of usages there, and most of
+// them do not have corresponding keycodes).
+#define U_CONSUMER 0x2000
+#define U_CONSUMER_MAX 0x2FFF
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /*
      * Plain ANSI QWERTY keyboard, except Caps Lock and App (Menu) keys are
@@ -210,5 +216,14 @@ bool led_update_user(led_t led_state) {
     }
 
     // Keep the default Caps Lock LED function
+    return true;
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case U_CONSUMER ... U_CONSUMER_MAX:
+            host_consumer_send(record->event.pressed ? (keycode - U_CONSUMER) : 0);
+            return false;
+    }
     return true;
 }
