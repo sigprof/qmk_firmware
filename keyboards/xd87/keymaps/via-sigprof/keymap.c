@@ -212,3 +212,15 @@ bool led_update_user(led_t led_state) {
     // Keep the default Caps Lock LED function
     return true;
 }
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case QK_FUNCTION ... QK_FUNCTION_MAX:
+            // Hijack the FUNC(n) keycodes to send the specified usage from the
+            // Consumer page (there are lots of usages there, and most of them
+            // do not have corresponding keycodes).
+            host_consumer_send(record->event.pressed ? (keycode - QK_FUNCTION) : 0);
+            return false;
+    }
+    return true;
+}
