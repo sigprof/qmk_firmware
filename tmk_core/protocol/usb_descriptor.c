@@ -241,9 +241,9 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM SharedReport[] = {
     HID_RI_COLLECTION(8, 0x01),           // Application
         HID_RI_REPORT_ID(8, REPORT_ID_CONSUMER),
         HID_RI_USAGE_MINIMUM(8, 0x01),    // Consumer Control
-        HID_RI_USAGE_MAXIMUM(16, 0x02A0), // AC Desktop Show All Applications
+        HID_RI_USAGE_MAXIMUM(16, 0x03FF), // as suggested in a Microsoft sample
         HID_RI_LOGICAL_MINIMUM(8, 0x01),
-        HID_RI_LOGICAL_MAXIMUM(16, 0x02A0),
+        HID_RI_LOGICAL_MAXIMUM(16, 0x03FF),
         HID_RI_REPORT_COUNT(8, 1),
         HID_RI_REPORT_SIZE(8, 16),
         HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_ARRAY | HID_IOF_ABSOLUTE),
