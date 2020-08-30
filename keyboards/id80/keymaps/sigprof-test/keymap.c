@@ -19,7 +19,7 @@ enum layer_names {
     _QWERTY,
     _NUMPAD,
     _FN,
-    _FN_ALT,
+    _FN_CTL,
     _ADJUST,
 };
 
@@ -32,7 +32,7 @@ enum layer_names {
 #define U_OSRCT OSM(MOD_RCTL)
 #define U_CPGUP RCTL(KC_PGUP)
 #define U_CPGDN RCTL(KC_PGDN)
-#define U_FNALT LM(_FN_ALT, MOD_LALT)
+#define U_FNCTL LM(_FN_CTL, MOD_LCTL)
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /*
@@ -126,16 +126,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         U_MONUM,     KC_BTN1, KC_MS_U, KC_BTN2, KC_WH_U, DM_PLY1, KC_INS,  KC_HOME, KC_UP,   KC_END,  KC_PGUP, KC_VOLU, KC_MUTE, U_TGNUM,        U_CPGDN,
         _______,       KC_MS_L, KC_MS_D, KC_MS_R, KC_WH_D, DM_PLY2, KC_DEL,  KC_LEFT, KC_DOWN, KC_RGHT, KC_PGDN, KC_VOLD, KC_PENT,
         _______,            KC_BTN3, KC_BTN4, KC_BTN5, KC_WH_L, KC_WH_R, KC_PSCR, KC_SLCK, KC_PAUS, U_OSRGU, U_OSRCT, _______,          KC_PGUP,
-        _______,   _______,   U_FNALT,                      U_MOADJ,                              _______,     _______,        KC_HOME, KC_PGDN, KC_END
+        U_FNCTL,   _______,   _______,                      U_MOADJ,                              _______,     _______,        KC_HOME, KC_PGDN, KC_END
     ),
 
     /*
-     * Fn+Alt layer - dynamic macro management:
-     * - Fn+Alt+Esc - stop recording;
-     * - Fn+Alt+T   - start recording macro 1;
-     * - Fn+Alt+G   - start recording macro 2.
+     * Fn+Ctrl layer - dynamic macro management:
+     * - Fn+Ctrl+Esc - stop recording;
+     * - Fn+Ctrl+T   - start recording macro 1;
+     * - Fn+Ctrl+G   - start recording macro 2.
      */
-    [_FN_ALT] = LAYOUT(
+    [_FN_CTL] = LAYOUT(
         DM_RSTP,   _______, _______, _______, _______,   _______, _______, _______, _______,   _______, _______, _______, _______,    _______,   _______,
         _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______,
         _______,     _______, _______, _______, _______, DM_REC1, _______, _______, _______, _______, _______, _______, _______, _______,        _______,
