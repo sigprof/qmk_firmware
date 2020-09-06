@@ -145,6 +145,34 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 };
 
+static struct {
+    bool group_led : 1;
+} indicators;
+
+static void update_indicators(void) {
+    if (indicators.group_led) {
+        backlight_set(get_backlight_level());
+    } else {
+        backlight_set(0);
+    }
+}
+
+void keyboard_post_init_user(void) {
+    update_indicators();
+}
+
+bool led_update_user(led_t led_state) {
+    // Assume that "grp_led:scroll" is used to make the Scroll Lock LED
+    // indicate the input language (XKB group).
+    if (indicators.group_led != led_state.scroll_lock) {
+        indicators.group_led = led_state.scroll_lock;
+        update_indicators();
+    }
+
+    // Keep the default Caps Lock LED function
+    return true;
+}
+
 bool get_clear_oneshot_layer(uint16_t keycode, keyrecord_t *record, bool default_value) {
     switch (keycode) {
         case RGB_TOG:
