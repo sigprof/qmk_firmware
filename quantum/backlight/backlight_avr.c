@@ -229,6 +229,23 @@ ISR(TIMERx_OVF_vect) {
 
 #define TIMER_TOP 0xFFFFU
 
+#ifdef BACKLIGHT_PWM_TIMER
+#    define TIMER_SCALE_SHIFT 3 // 1953 Hz
+#else
+#    define TIMER_SCALE_SHIFT 5 // 7812 Hz
+#endif
+
+static inline uint16_t pwm_scale(uint16_t raw_value) {
+    if (!raw_value) {
+        return 0;
+    } else {
+        raw_value >>= TIMER_SCALE_SHIFT;
+        if (!raw_value)
+            raw_value = 1;
+        return raw_value;
+    }
+}
+
 // See http://jared.geek.nz/2013/feb/linear-led-pwm
 static uint16_t cie_lightness(uint16_t v) {
     if (v <= 5243)     // if below 8% of max
@@ -249,7 +266,7 @@ static uint16_t cie_lightness(uint16_t v) {
 static uint32_t rescale_limit_val(uint32_t val) { return (val * (BACKLIGHT_LIMIT_VAL + 1)) / 256; }
 
 // range for val is [0..TIMER_TOP]. PWM pin is high while the timer count is below val.
-static inline void set_pwm(uint16_t val) { OCRxx = val; }
+static inline void set_pwm(uint16_t val) { OCRxx = pwm_scale(val); }
 
 void backlight_set(uint8_t level) {
     if (level > BACKLIGHT_LEVELS) level = BACKLIGHT_LEVELS;
@@ -374,9 +391,10 @@ ISR(TIMERx_OVF_vect)
 #    endif
 {
     uint8_t  breathing_period = get_breathing_period();
-    uint16_t interval         = (uint16_t)breathing_period * 244 / BREATHING_STEPS;
+    uint16_t timer_freq       = 244 << TIMER_SCALE_SHIFT;
+    uint16_t interval         = (uint16_t)breathing_period * timer_freq / BREATHING_STEPS;
     // resetting after one period to prevent ugly reset at overflow.
-    breathing_counter = (breathing_counter + 1) % (breathing_period * 244);
+    breathing_counter = (breathing_counter + 1) % (breathing_period * timer_freq);
     uint8_t index     = breathing_counter / interval % BREATHING_STEPS;
 
     if (((breathing_halt == BREATHING_HALT_ON) && (index == BREATHING_STEPS / 2)) || ((breathing_halt == BREATHING_HALT_OFF) && (index == BREATHING_STEPS - 1))) {
@@ -422,7 +440,7 @@ void backlight_init_ports(void) {
     TCCRxB = _BV(WGM13) | _BV(WGM12) | _BV(CS10);
 #endif
     // Use full 16-bit resolution. Counter counts to ICR1 before reset to 0.
-    ICRx = TIMER_TOP;
+    ICRx = pwm_scale(TIMER_TOP);
 
     backlight_init();
 #ifdef BACKLIGHT_BREATHING
