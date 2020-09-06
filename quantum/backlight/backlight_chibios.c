@@ -40,8 +40,16 @@
 #    endif
 #endif
 
-static PWMConfig pwmCFG = {0xFFFF, /* PWM clock frequency  */
-                           256,    /* PWM period (in ticks) 1S (1/10kHz=0.1mS 0.1ms*10000 ticks=1S) */
+#define PWM_PERIOD 256
+
+#ifdef BACKLIGHT_PWM_OUTPUT_FREQUENCY
+#    define PWM_CLOCK_FREQ (BACKLIGHT_PWM_OUTPUT_FREQUENCY * PWM_PERIOD)
+#else
+#    define PWM_CLOCK_FREQ 0xFFFF
+#endif
+
+static PWMConfig pwmCFG = {PWM_CLOCK_FREQ, /* PWM clock frequency  */
+                           PWM_PERIOD,     /* PWM period (in ticks) 1S (1/10kHz=0.1mS 0.1ms*10000 ticks=1S) */
                            NULL,   /* Breathing Callback */
                            {       /* Default all channels to disabled - Channels will be configured durring init */
                             {PWM_OUTPUT_DISABLED, NULL},
@@ -137,11 +145,12 @@ static inline uint16_t scale_backlight(uint16_t v) { return v / BACKLIGHT_LEVELS
 
 void breathing_callback(PWMDriver *pwmp) {
     uint8_t  breathing_period = get_breathing_period();
-    uint16_t interval         = (uint16_t)breathing_period * 256 / BREATHING_STEPS;
+    uint16_t timer_freq       = (PWM_CLOCK_FREQ + PWM_PERIOD/2) / PWM_PERIOD;
+    uint16_t interval         = (uint16_t)breathing_period * timer_freq / BREATHING_STEPS;
 
     // resetting after one period to prevent ugly reset at overflow.
     static uint16_t breathing_counter = 0;
-    breathing_counter                 = (breathing_counter + 1) % (breathing_period * 256);
+    breathing_counter                 = (breathing_counter + 1) % (breathing_period * timer_freq);
     uint8_t  index                    = breathing_counter / interval % BREATHING_STEPS;
     uint32_t duty                     = cie_lightness(rescale_limit_val(scale_backlight(breathing_table[index] * 256)));
 
