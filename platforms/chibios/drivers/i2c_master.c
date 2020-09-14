@@ -109,11 +109,19 @@ static const I2CConfig i2cconfig = {
 
 static i2c_status_t chibios_to_qmk(const msg_t* status) {
     switch (*status) {
-        case I2C_NO_ERROR:
+        case MSG_OK:
             return I2C_STATUS_SUCCESS;
-        case I2C_TIMEOUT:
+        case MSG_TIMEOUT:
             return I2C_STATUS_TIMEOUT;
-        // I2C_BUS_ERROR, I2C_ARBITRATION_LOST, I2C_ACK_FAILURE, I2C_OVERRUN, I2C_PEC_ERROR, I2C_SMB_ALERT
+        case MSG_RESET:
+            {
+                i2cflags_t flags = i2cGetErrors(&I2C_DRIVER);
+                if (flags & I2C_TIMEOUT) {
+                    return I2C_STATUS_TIMEOUT;
+                }
+                // I2C_BUS_ERROR, I2C_ARBITRATION_LOST, I2C_ACK_FAILURE, I2C_OVERRUN, I2C_PEC_ERROR, I2C_SMB_ALERT
+                return I2C_STATUS_ERROR;
+            }
         default:
             return I2C_STATUS_ERROR;
     }
