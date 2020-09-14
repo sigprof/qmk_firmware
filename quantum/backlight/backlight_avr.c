@@ -232,7 +232,7 @@ ISR(TIMERx_OVF_vect) {
 #ifdef BACKLIGHT_PWM_TIMER
 #    define TIMER_SCALE_SHIFT 3 // 1953 Hz
 #else
-#    define TIMER_SCALE_SHIFT 5 // 7812 Hz
+#    define TIMER_SCALE_SHIFT 4 // 3906 Hz
 #endif
 
 static inline uint16_t pwm_scale(uint16_t raw_value) {
