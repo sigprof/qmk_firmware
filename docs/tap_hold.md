@@ -67,7 +67,7 @@ An example of a sequence which is affected by the “permissive hold” mode:
 - `KC_L` Up
 - `LT(2, KC_A)` Up
 
-Normally, if you do all this within the `TAPPING_TERM` (default: 200ms), this will be registered as `al` by the firmware and host system.  With the `PERMISSIVE_HOLD` option enabled, the Layer Tap key is considered as a layer switch if another key is tapped, and the above sequence would be registered as `KC_RHGT` (the mapping of `L` on layer 2).
+Normally, if you do all this within the `TAPPING_TERM` (default: 200ms), this will be registered as `al` by the firmware and host system.  With the `PERMISSIVE_HOLD` option enabled, the Layer Tap key is considered as a layer switch if another key is tapped, and the above sequence would be registered as `KC_RGHT` (the mapping of `L` on layer 2).
 
 However, this slightly different sequence will not be affected by the “permissive hold” mode:
 
@@ -92,10 +92,10 @@ You can then add the following function to your keymap:
 bool get_permissive_hold(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case LT(1, KC_BSPC):
-            // Immediately select the tap action when another key is tapped.
+            // Immediately select the hold action when another key is tapped.
             return true;
         default:
-            // Do not select the tap action when another key is tapped.
+            // Do not select the hold action when another key is tapped.
             return false;
     }
 }
@@ -120,7 +120,7 @@ An example of a sequence which is affected by the “hold on other key press” 
 - `LT(2, KC_A)` Up
 - `KC_L` Up
 
-Normally, if you do all this within the `TAPPING_TERM` (default: 200ms), this will be registered as `al` by the firmware and host system.  With the `HOLD_ON_OTHER_KEY_PRESS` option enabled, the Layer Tap key is considered as a layer switch if another key is pressed, and the above sequence would be registered as `KC_RHGT` (the mapping of `L` on layer 2).
+Normally, if you do all this within the `TAPPING_TERM` (default: 200ms), this will be registered as `al` by the firmware and host system.  With the `HOLD_ON_OTHER_KEY_PRESS` option enabled, the Layer Tap key is considered as a layer switch if another key is pressed, and the above sequence would be registered as `KC_RGHT` (the mapping of `L` on layer 2).
 
 ?> The `HOLD_ON_OTHER_KEY_PRESS` option also affects Mod Tap keys, but this may not be noticeable if you do not also enable the `IGNORE_MOD_TAP_INTERRUPT` option for those keys, because the default handler for Mod Tap keys also considers the “rolling press” sequence like shown above as a modifier hold, not the tap action.  If you do not enable `IGNORE_MOD_TAP_INTERRUPT`, the effect of `HOLD_ON_OTHER_KEY_PRESS` on Mod Tap keys would be limited to reducing the delay before the key events are made visible to the host.
 
@@ -136,10 +136,10 @@ You can then add the following function to your keymap:
 bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case LT(1, KC_BSPC):
-            // Immediately select the tap action when another key is pressed.
+            // Immediately select the hold action when another key is pressed.
             return true;
         default:
-            // Do not select the tap action when another key is pressed.
+            // Do not select the hold action when another key is pressed.
             return false;
     }
 }
