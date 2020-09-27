@@ -84,6 +84,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define OLED_ALL_BLOCKS_MASK (((((OLED_BLOCK_TYPE)1 << (OLED_BLOCK_COUNT - 1)) - 1) << 1) | 1)
 
+#ifndef OLED_HW_MULTIPLEX_RATIO
+#    define OLED_HW_MULTIPLEX_RATIO (OLED_DISPLAY_HEIGHT - 1)
+#endif
+#ifndef OLED_HW_DISPLAY_OFFSET_NORMAL
+#    define OLED_HW_DISPLAY_OFFSET_NORMAL 0
+#endif
+#ifndef OLED_HW_DISPLAY_OFFSET_FLIPPED
+#    define OLED_HW_DISPLAY_OFFSET_FLIPPED 0
+#endif
+
 // i2c defines
 #define I2C_CMD 0x00
 #define I2C_DATA 0x40
@@ -162,9 +172,7 @@ bool oled_init(uint8_t rotation) {
         DISPLAY_CLOCK,
         0x80,
         MULTIPLEX_RATIO,
-        OLED_DISPLAY_HEIGHT - 1,
-        DISPLAY_OFFSET,
-        0x00,
+        OLED_HW_MULTIPLEX_RATIO,
         DISPLAY_START_LINE | 0x00,
         CHARGE_PUMP,
         0x14,
@@ -180,13 +188,13 @@ bool oled_init(uint8_t rotation) {
     }
 
     if (!HAS_FLAGS(oled_rotation, OLED_ROTATION_180)) {
-        static const uint8_t PROGMEM display_normal[] = {I2C_CMD, SEGMENT_REMAP_INV, COM_SCAN_DEC};
+        static const uint8_t PROGMEM display_normal[] = {I2C_CMD, SEGMENT_REMAP_INV, COM_SCAN_DEC, DISPLAY_OFFSET, OLED_HW_DISPLAY_OFFSET_NORMAL};
         if (I2C_TRANSMIT_P(display_normal) != I2C_STATUS_SUCCESS) {
             print("oled_init cmd normal rotation failed\n");
             return false;
         }
     } else {
-        static const uint8_t PROGMEM display_flipped[] = {I2C_CMD, SEGMENT_REMAP, COM_SCAN_INC};
+        static const uint8_t PROGMEM display_flipped[] = {I2C_CMD, SEGMENT_REMAP, COM_SCAN_INC, DISPLAY_OFFSET, OLED_HW_DISPLAY_OFFSET_FLIPPED};
         if (I2C_TRANSMIT_P(display_flipped) != I2C_STATUS_SUCCESS) {
             print("display_flipped failed\n");
             return false;
