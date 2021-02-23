@@ -48,6 +48,36 @@
 #    define WS2812_PWM_TARGET_PERIOD 80000  // TODO: work out why 10x less on f303/f4x1
 #endif
 
+// DMA memory data width
+// 8 bits with T1H = 800 ns should be enough until about 640 MHz SYSCLK
+#ifndef WS2812_DMA_DATA_BITS
+#    if STM32_DMA_ADVANCED // DMAv2 - F4xx, F7xx, H7xx
+#        define WS2812_DMA_DATA_BITS 32 // DMAv2 lost the zero extension feature
+#    else
+#        define WS2812_DMA_DATA_BITS 8
+#    endif
+#endif
+#if WS2812_DMA_DATA_BITS == 8
+#    define PWM_TYPE uint8_t
+#    define MSIZE STM32_DMA_CR_MSIZE_BYTE
+#    define PSIZE STM32_DMA_CR_PSIZE_BYTE
+#elif WS2812_DMA_DATA_BITS == 16
+#    define PWM_TYPE uint16_t
+#    define MSIZE STM32_DMA_CR_MSIZE_HWORD
+#    define PSIZE STM32_DMA_CR_PSIZE_HWORD
+#elif WS2812_DMA_DATA_BITS == 32
+#    define PWM_TYPE uint32_t
+#    define MSIZE STM32_DMA_CR_MSIZE_WORD
+#    define PSIZE STM32_DMA_CR_PSIZE_WORD
+#else
+#    error "Invalid WS2812_DMA_DATA_BITS value"
+#endif
+#if STM32_DMA_ADVANCED
+#    define DMA_SIZE_FLAGS (MSIZE | PSIZE)
+#else
+#    define DMA_SIZE_FLAGS (MSIZE | STM32_DMA_CR_PSIZE_WORD)
+#endif
+
 /* --- PRIVATE CONSTANTS ---------------------------------------------------- */
 
 #define WS2812_PWM_FREQUENCY (STM32_SYSCLK / 2)                             /**< Clock frequency of PWM, must be valid with respect to system clock! */
@@ -221,7 +251,7 @@
 
 /* --- PRIVATE VARIABLES ---------------------------------------------------- */
 
-static uint32_t ws2812_frame_buffer[WS2812_BIT_N + 1]; /**< Buffer for a frame */
+static PWM_TYPE ws2812_frame_buffer[WS2812_BIT_N + 1]; /**< Buffer for a frame */
 
 /* --- PUBLIC FUNCTIONS ----------------------------------------------------- */
 /*
@@ -231,6 +261,9 @@ write/read to/from the other buffer).
  */
 
 void ws2812_init(void) {
+    // Check that PWM_TYPE is wide enough
+    _Static_assert(WS2812_DUTYCYCLE_1 == (PWM_TYPE)WS2812_DUTYCYCLE_1, "WS2812_DUTYCYCLE_1 does not fit in PWM_TYPE");
+
     // Initialize led frame buffer
     uint32_t i;
     for (i = 0; i < WS2812_COLOR_BIT_N; i++) ws2812_frame_buffer[i] = WS2812_DUTYCYCLE_0;      // All color bits are zero duty cycle
@@ -260,7 +293,7 @@ void ws2812_init(void) {
     dmaStreamSetPeripheral(WS2812_DMA_STREAM, &(WS2812_PWM_DRIVER.tim->CCR[WS2812_PWM_CHANNEL - 1]));  // Ziel ist der An-Zeit im Cap-Comp-Register
     dmaStreamSetMemory0(WS2812_DMA_STREAM, ws2812_frame_buffer);
     dmaStreamSetTransactionSize(WS2812_DMA_STREAM, WS2812_BIT_N);
-    dmaStreamSetMode(WS2812_DMA_STREAM, STM32_DMA_CR_CHSEL(WS2812_DMA_CHANNEL) | STM32_DMA_CR_DIR_M2P | STM32_DMA_CR_PSIZE_WORD | STM32_DMA_CR_MSIZE_WORD | STM32_DMA_CR_MINC | STM32_DMA_CR_CIRC | STM32_DMA_CR_PL(3));
+    dmaStreamSetMode(WS2812_DMA_STREAM, STM32_DMA_CR_CHSEL(WS2812_DMA_CHANNEL) | STM32_DMA_CR_DIR_M2P | DMA_SIZE_FLAGS | STM32_DMA_CR_MINC | STM32_DMA_CR_CIRC | STM32_DMA_CR_PL(3));
     // M2P: Memory 2 Periph; PL: Priority Level
 
 #if (STM32_DMA_SUPPORTS_DMAMUX == TRUE)
