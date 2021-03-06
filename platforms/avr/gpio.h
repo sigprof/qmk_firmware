@@ -33,6 +33,6 @@ typedef uint8_t pin_t;
 #define writePinLow(pin) (PORTx_ADDRESS(pin) &= ~_BV((pin)&0xF))
 #define writePin(pin, level) ((level) ? writePinHigh(pin) : writePinLow(pin))
 
-#define readPin(pin) ((bool)(PINx_ADDRESS(pin) & _BV((pin)&0xF)))
+#define readPin(pin) ((bool)(PINx_ADDRESS(pin) & (uint8_t)_BV((pin)&0xF)))
 
 #define togglePin(pin) (PORTx_ADDRESS(pin) ^= _BV((pin)&0xF))
