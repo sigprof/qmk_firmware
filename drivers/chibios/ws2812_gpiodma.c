@@ -343,6 +343,14 @@ static void ws2812_t1h_dma_complete(void *context, uint32_t flags);
  * This function is called in the I-Locked or S-Locked state, therefore only I-Class APIs may be used.
  */
 static void ws2812_start_send(void) {
+    // Save the DMA/interrupt enable register state which was configured by pwmStart().
+    uint32_t dier = WS2812_GPIODMA_PWM_DRIVER.tim->DIER;
+
+    // Disable all DMA requests from the timer.  This is required to reset pending DMA requests, otherwise they will be
+    // serviced immediately after enabling the DMA streams, breaking the proper order of operations.  See AN4031 Rev.3,
+    // section 4.1 “Software sequence to disable DMA”; the DMA stream is already disabled at this point.
+    WS2812_GPIODMA_PWM_DRIVER.tim->DIER = dier & ~(STM32_TIM_DIER_UDE | STM32_TIM_DIER_CC1DE | STM32_TIM_DIER_CC2DE | STM32_TIM_DIER_CC3DE | STM32_TIM_DIER_CC4DE);
+
     // Set up DMA for the start of the bit pulse.  This DMA transfer always sets the DI pin to 1, and the count is
     // limited to the number of color bits (preamble is not included, because the update event which usually triggers
     // this transfer is generated only after the first PWM period is finished).
@@ -382,6 +390,10 @@ static void ws2812_start_send(void) {
     dmaStreamEnable(WS2812_GPIODMA_START_DMA_STREAM);
     dmaStreamEnable(WS2812_GPIODMA_T0H_DMA_STREAM);
     dmaStreamEnable(WS2812_GPIODMA_T1H_DMA_STREAM);
+
+    // Enable DMA requests from the timer again.  This must be done after the DMA streams are enabled; see AN4031 Rev.3,
+    // section 4.3 “Software sequence to enable DMA”.
+    WS2812_GPIODMA_PWM_DRIVER.tim->DIER = dier;
 
     // Finally, enable the timer counter.
     WS2812_GPIODMA_PWM_DRIVER.tim->CR1 |= STM32_TIM_CR1_CEN;
