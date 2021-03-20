@@ -220,7 +220,7 @@
  *
  * @return                          The bit index
  */
-#define WS2812_BIT(led, byte, bit) (WS2812_BITS_PER_LED * (led) + 8 * (byte) + (7 - (bit)))
+#define WS2812_BIT(led, byte, bit) (WS2812_PREAMBLE_BIT_N + WS2812_BITS_PER_LED * (led) + 8 * (byte) + (7 - (bit)))
 
 /**
  * @brief   Determine the index in @ref ws2812_frame_buffer "the frame buffer" of a given red bit
