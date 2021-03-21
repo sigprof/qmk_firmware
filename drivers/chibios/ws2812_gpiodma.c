@@ -27,6 +27,8 @@
 #        define WS2812_GPIODMA_PWM_DRIVER PWMD4
 #        define WS2812_GPIODMA_START_PWM_CHANNEL 1
 #        define WS2812_GPIODMA_START_DMA_STREAM STM32_DMA1_STREAM1
+//#        define WS2812_GPIODMA_START_PWM_CHANNEL 0
+//#        define WS2812_GPIODMA_START_DMA_STREAM STM32_DMA1_STREAM7
 #        define WS2812_GPIODMA_T0H_PWM_CHANNEL 2
 #        define WS2812_GPIODMA_T0H_DMA_STREAM STM32_DMA1_STREAM4
 #        define WS2812_GPIODMA_T1H_PWM_CHANNEL 3
@@ -50,6 +52,7 @@
 #        define WS2812_GPIODMA_T1H_PWM_CHANNEL 3
 #        define WS2812_GPIODMA_T1H_DMA_STREAM STM32_DMA2_STREAM6
 #        define WS2812_GPIODMA_T1H_DMA_CHANNEL 6
+#        define WS2812_GPIODMA_PERIPHERAL_TO_MEMORY
 #    else
 #        error "WS2812 GPIODMA driver configuration missing"
 #    endif
@@ -189,6 +192,8 @@
  */
 #    define BRR_DMA_PSIZE STM32_DMA_CR_PSIZE_WORD
 
+#    define BRR_DMA_SIZE WORD
+
 #else
 
 /**
@@ -207,6 +212,9 @@
  * devices also use DMAv2, which requires the peripheral and memory data size to be the same.
  */
 #    define BRR_DMA_PSIZE STM32_DMA_CR_PSIZE_HWORD
+
+#    define BRR_DMA_SIZE HWORD
+
 #endif
 
 /* --- PRIVATE MACROS ------------------------------------------------------- */
@@ -310,6 +318,54 @@
 
 #endif
 
+#if (STM32_DMA_SUPPORTS_DMAMUX == TRUE)
+#    define WS2812_DMA_SET_DMAMUX(name) dmaSetRequestSource(name##_DMA_STREAM, name##_DMAMUX_ID)
+#else
+#    define WS2812_DMA_SET_DMAMUX(name) _Static_assert(true, "")
+#endif
+
+#ifdef WS2812_GPIODMA_PERIPHERAL_TO_MEMORY
+#    define WS2812_DMA_SET_MEM_ADDR(name, addr) dmaStreamSetPeripheral(name##_DMA_STREAM, (addr))
+#    define WS2812_DMA_SET_GPIO_ADDR(name, addr) dmaStreamSetMemory0(name##_DMA_STREAM, (addr))
+#    define WS2812_DMA_DIR STM32_DMA_CR_DIR_P2M
+#    define WS2812_DMA_MEM_WIDTH(width) STM32_DMA_CR_PSIZE_##width
+#    define WS2812_DMA_GPIO_WIDTH(width) STM32_DMA_CR_MSIZE_##width
+#    define WS2812_DMA_MEM_INC(inc_flag) ((inc_flag) ? STM32_DMA_CR_PINC : 0)
+#else
+#    define WS2812_DMA_SET_MEM_ADDR(name, addr) dmaStreamSetMemory0(name##_DMA_STREAM, (addr))
+#    define WS2812_DMA_SET_GPIO_ADDR(name, addr) dmaStreamSetPeripheral(name##_DMA_STREAM, (addr))
+#    define WS2812_DMA_DIR STM32_DMA_CR_DIR_M2P
+#    define WS2812_DMA_MEM_WIDTH(width) STM32_DMA_CR_MSIZE_##width
+#    define WS2812_DMA_GPIO_WIDTH(width) STM32_DMA_CR_PSIZE_##width
+#    define WS2812_DMA_MEM_INC(inc_flag) ((inc_flag) ? STM32_DMA_CR_MINC : 0)
+#endif
+
+// clang-format off
+/**
+ * @brief   Set up DMA for a memory to GPIO transfer
+ *
+ * @param[in] name:         The DMA stream base name
+ * @param[in] mem_addr:     The source address in memory
+ * @param[in] gpio_addr:    The destination address in GPIO port registers
+ * @param[in] size:         The transaction size (number of DMA transfers)
+ * @param[in] mem_width:    The memory data width [BYTE, HWORD, WORD]
+ * @param[in] gpio_width:   The GPIO data width [BYTE, HWORD, WORD]
+ * @param[in] mem_inc:      True if the DMA memory address needs to be incremented after each data transfer
+ * @param[in] mode:         Extra DMA mode flags
+ */
+#define WS2812_DMA_SETUP(name, mem_addr, gpio_addr, size, mem_width, gpio_width, mem_inc, mode)     \
+    do {                                                                                            \
+        WS2812_DMA_SET_MEM_ADDR(name, (mem_addr));                                                  \
+        WS2812_DMA_SET_GPIO_ADDR(name, (gpio_addr));                                                \
+        dmaStreamSetTransactionSize(name##_DMA_STREAM, (size));                                     \
+        dmaStreamSetMode(name##_DMA_STREAM,                                                         \
+                         ( (mode) | STM32_DMA_CR_CHSEL(name##_DMA_CHANNEL) | STM32_DMA_CR_PL(3)     \
+                           | WS2812_DMA_MEM_WIDTH(mem_width) | WS2812_DMA_GPIO_WIDTH(gpio_width)    \
+                           | WS2812_DMA_DIR | WS2812_DMA_MEM_INC(mem_inc) ));                       \
+        WS2812_DMA_SET_DMAMUX(name);                                                                \
+    } while (0)
+// clang-format on
+
 /* --- PRIVATE VARIABLES ---------------------------------------------------- */
 
 static uint32_t ws2812_tstart_bsrr = WS2812_DI_BIT_MASK; /**< Value to be transferred to BSRR at the start of the bit time */
@@ -354,37 +410,19 @@ static void ws2812_start_send(void) {
     // Set up DMA for the start of the bit pulse.  This DMA transfer always sets the DI pin to 1, and the count is
     // limited to the number of color bits (preamble is not included, because the update event which usually triggers
     // this transfer is generated only after the first PWM period is finished).
-    dmaStreamSetPeripheral(WS2812_GPIODMA_START_DMA_STREAM, &(WS2812_DI_PORT->BSRR));
-    dmaStreamSetMemory0(WS2812_GPIODMA_START_DMA_STREAM, &ws2812_tstart_bsrr);
-    dmaStreamSetTransactionSize(WS2812_GPIODMA_START_DMA_STREAM, WS2812_COLOR_BIT_N);
-    dmaStreamSetMode(WS2812_GPIODMA_START_DMA_STREAM, STM32_DMA_CR_CHSEL(WS2812_GPIODMA_START_DMA_CHANNEL) | STM32_DMA_CR_DIR_M2P | STM32_DMA_CR_PSIZE_WORD | STM32_DMA_CR_MSIZE_WORD | STM32_DMA_CR_PL(3));
-#if (STM32_DMA_SUPPORTS_DMAMUX == TRUE)
-    dmaSetRequestSource(WS2812_GPIODMA_START_DMA_STREAM, WS2812_GPIODMA_START_DMAMUX_ID);
-#endif
+    WS2812_DMA_SETUP(WS2812_GPIODMA_START, &ws2812_tstart_bsrr, &(WS2812_DI_PORT->BSRR), WS2812_COLOR_BIT_N, WORD, WORD, false, 0);
 
     // Set up DMA for T0H.  This DMA transfer sets the DI pin to 0 (creating a short pulse) if the currently transferred
     // bit should be 0.  The count includes an extra element for the preamble (it should set the DI pin to 0).  On chips
     // with DMAv1 the data sizes for memory and peripheral may not match (the memory data size is always 16 bit, and the
     // peripheral data size is required to be 32 bit for GPIOv1).
-    dmaStreamSetPeripheral(WS2812_GPIODMA_T0H_DMA_STREAM, &WS2812_DI_BRR);
-    dmaStreamSetMemory0(WS2812_GPIODMA_T0H_DMA_STREAM, ws2812_frame_buffer);
-    dmaStreamSetTransactionSize(WS2812_GPIODMA_T0H_DMA_STREAM, WS2812_DATA_BIT_N);
-    dmaStreamSetMode(WS2812_GPIODMA_T0H_DMA_STREAM, STM32_DMA_CR_CHSEL(WS2812_GPIODMA_T0H_DMA_CHANNEL) | STM32_DMA_CR_DIR_M2P | BRR_DMA_PSIZE | STM32_DMA_CR_MSIZE_HWORD | STM32_DMA_CR_MINC | STM32_DMA_CR_PL(3));
-#if (STM32_DMA_SUPPORTS_DMAMUX == TRUE)
-    dmaSetRequestSource(WS2812_GPIODMA_T0H_DMA_STREAM, WS2812_GPIODMA_T0H_DMAMUX_ID);
-#endif
+    WS2812_DMA_SETUP(WS2812_GPIODMA_T0H, ws2812_frame_buffer, &WS2812_DI_BRR, WS2812_DATA_BIT_N, HWORD, BRR_DMA_SIZE, true, 0);
 
     // Set up DMA for T1H.  This DMA transfer always sets the DI pin to 0, finishing the long pulse if the currently
     // transferred bit should be 1, or doing nothing if either the currently transferred bit should be 0, or during the
     // reset pulse.  The count is set according to the total number of bit times including the reset pulse.  The same
     // data sizes as for T0H are used.
-    dmaStreamSetPeripheral(WS2812_GPIODMA_T1H_DMA_STREAM, &WS2812_DI_BRR);
-    dmaStreamSetMemory0(WS2812_GPIODMA_T1H_DMA_STREAM, &ws2812_t1h_brr);
-    dmaStreamSetTransactionSize(WS2812_GPIODMA_T1H_DMA_STREAM, WS2812_TOTAL_BIT_N);
-    dmaStreamSetMode(WS2812_GPIODMA_T1H_DMA_STREAM, STM32_DMA_CR_CHSEL(WS2812_GPIODMA_T1H_DMA_CHANNEL) | STM32_DMA_CR_DIR_M2P | BRR_DMA_PSIZE | STM32_DMA_CR_MSIZE_HWORD | STM32_DMA_CR_PL(3) | STM32_DMA_CR_TCIE);
-#if (STM32_DMA_SUPPORTS_DMAMUX == TRUE)
-    dmaSetRequestSource(WS2812_GPIODMA_T1H_DMA_STREAM, WS2812_GPIODMA_T1H_DMAMUX_ID);
-#endif
+    WS2812_DMA_SETUP(WS2812_GPIODMA_T1H, &ws2812_t1h_brr, &WS2812_DI_BRR, WS2812_TOTAL_BIT_N, HWORD, BRR_DMA_SIZE, false, STM32_DMA_CR_TCIE);
 
     // Start all DMA streams (the timer counter is assumed to be disabled at this time).
     dmaStreamEnable(WS2812_GPIODMA_START_DMA_STREAM);
