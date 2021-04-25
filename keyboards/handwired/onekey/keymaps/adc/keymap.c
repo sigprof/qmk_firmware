@@ -14,7 +14,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case ADC_SAMPLE:
             if (record->event.pressed) {
+#ifdef ADC_PIN_MUX
+                int16_t val = adc_read(ADC_PIN_MUX);
+#else
                 int16_t val = analogReadPin(ADC_PIN);
+#endif
 
                 char buffer[50];
                 sprintf(buffer, "ADC:%u\n", val);

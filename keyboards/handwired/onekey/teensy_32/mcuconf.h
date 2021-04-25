@@ -48,4 +48,6 @@
 #define KINETIS_I2C_USE_I2C0                TRUE
 #define KINETIS_I2C_I2C0_PRIORITY           4
 
+#define KINETIS_ADC_USE_ADC0                TRUE
+
 #endif /* _MCUCONF_H_ */

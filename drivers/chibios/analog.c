@@ -23,9 +23,9 @@
 #    error "You need to set HAL_USE_ADC to TRUE in your halconf.h to use the ADC."
 #endif
 
-#if !STM32_ADC_USE_ADC1 && !STM32_ADC_USE_ADC2 && !STM32_ADC_USE_ADC3 && !STM32_ADC_USE_ADC4
-#    error "You need to set one of the 'STM32_ADC_USE_ADCx' settings to TRUE in your mcuconf.h to use the ADC."
-#endif
+//#if !STM32_ADC_USE_ADC1 && !STM32_ADC_USE_ADC2 && !STM32_ADC_USE_ADC3 && !STM32_ADC_USE_ADC4
+//#    error "You need to set one of the 'STM32_ADC_USE_ADCx' settings to TRUE in your mcuconf.h to use the ADC."
+//#endif
 
 #if STM32_ADC_DUAL_MODE
 #    error "STM32 ADC Dual Mode is not supported at this time."
@@ -40,6 +40,8 @@
 #    define USE_ADCV1
 #elif defined(STM32F1XX) || defined(STM32F2XX) || defined(STM32F4XX)
 #    define USE_ADCV2
+#elif defined(K20x)
+#    define USE_KINETIS_ADCv1
 #endif
 
 // BODGE to make v2 look like v1,3 and 4
@@ -79,6 +81,8 @@
 #        define ADC_COUNT 1
 #    elif defined(STM32F3XX)
 #        define ADC_COUNT 4
+#    elif defined(K20x)
+#        define ADC_COUNT 1 // Actually there are 2, but the ChibiOS driver supports only one of them.
 #    else
 #        error "ADC_COUNT has not been set for this ARM microcontroller."
 #    endif
@@ -101,14 +105,28 @@
 
 // Options are 12, 10, 8, and 6 bit.
 #ifndef ADC_RESOLUTION
-#    ifdef ADC_CFGR_RES_10BITS  // ADCv3, ADCv4
+#    if defined(USE_KINETIS_ADCv1)
+#        define ADC_RESOLUTION ADCx_CFG1_MODE_10_OR_11_BITS
+#    elif defined(ADC_CFGR_RES_10BITS)  // ADCv3, ADCv4
 #        define ADC_RESOLUTION ADC_CFGR_RES_10BITS
 #    else  // ADCv1, ADCv5, or the bodge for ADCv2 above
 #        define ADC_RESOLUTION ADC_CFGR1_RES_10BIT
 #    endif
 #endif
 
-static ADCConfig   adcCfg = {};
+#if defined(USE_KINETIS_ADCv1)
+// Some ADC channels have `ADxxa` and `ADxxb` options which are switched by the MUXSEL bit in ADC->CFG2.
+// Pack this extra bit into the `input` field of `adc_mux`.
+#    define MUX_INPUT_INDEX_MASK 0x1F
+#    define MUX_INPUT_SET_A      0x00
+#    define MUX_INPUT_SET_B      0x80
+#endif
+
+static ADCConfig   adcCfg = {
+#if defined(USE_KINETIS_ADCv1)
+    .calibrate = true,
+#endif
+};
 static adcsample_t sampleBuffer[ADC_NUM_CHANNELS * ADC_BUFFER_DEPTH];
 
 // Initialize to max number of ADCs, set to empty object to initialize all to false.
@@ -127,6 +145,9 @@ static ADCConversionGroup adcConversionGroup = {
 #    endif
     .smpr2 = ADC_SMPR2_SMP_AN0(ADC_SAMPLING_RATE) | ADC_SMPR2_SMP_AN1(ADC_SAMPLING_RATE) | ADC_SMPR2_SMP_AN2(ADC_SAMPLING_RATE) | ADC_SMPR2_SMP_AN3(ADC_SAMPLING_RATE) | ADC_SMPR2_SMP_AN4(ADC_SAMPLING_RATE) | ADC_SMPR2_SMP_AN5(ADC_SAMPLING_RATE) | ADC_SMPR2_SMP_AN6(ADC_SAMPLING_RATE) | ADC_SMPR2_SMP_AN7(ADC_SAMPLING_RATE) | ADC_SMPR2_SMP_AN8(ADC_SAMPLING_RATE) | ADC_SMPR2_SMP_AN9(ADC_SAMPLING_RATE),
     .smpr1 = ADC_SMPR1_SMP_AN10(ADC_SAMPLING_RATE) | ADC_SMPR1_SMP_AN11(ADC_SAMPLING_RATE) | ADC_SMPR1_SMP_AN12(ADC_SAMPLING_RATE) | ADC_SMPR1_SMP_AN13(ADC_SAMPLING_RATE) | ADC_SMPR1_SMP_AN14(ADC_SAMPLING_RATE) | ADC_SMPR1_SMP_AN15(ADC_SAMPLING_RATE),
+#elif defined(USE_KINETIS_ADCv1)
+    .cfg1 = ADCx_CFG1_ADICLK(ADCx_CFG1_ADIVCLK_BUS_CLOCK_DIV_2) | ADCx_CFG1_MODE(ADC_RESOLUTION) | ADCx_CFG1_ADIV(ADCx_CFG1_ADIV_DIV_8),
+    .sc3  = ADCx_SC3_AVGE | ADCx_SC3_AVGS(ADCx_SC3_AVGS_AVERAGE_32_SAMPLES),
 #else
     .cfgr = ADC_CFGR_CONT | ADC_RESOLUTION,
     .smpr = {ADC_SMPR1_SMP_AN0(ADC_SAMPLING_RATE) | ADC_SMPR1_SMP_AN1(ADC_SAMPLING_RATE) | ADC_SMPR1_SMP_AN2(ADC_SAMPLING_RATE) | ADC_SMPR1_SMP_AN3(ADC_SAMPLING_RATE) | ADC_SMPR1_SMP_AN4(ADC_SAMPLING_RATE) | ADC_SMPR1_SMP_AN5(ADC_SAMPLING_RATE) | ADC_SMPR1_SMP_AN6(ADC_SAMPLING_RATE) | ADC_SMPR1_SMP_AN7(ADC_SAMPLING_RATE) | ADC_SMPR1_SMP_AN8(ADC_SAMPLING_RATE) | ADC_SMPR1_SMP_AN9(ADC_SAMPLING_RATE), ADC_SMPR2_SMP_AN10(ADC_SAMPLING_RATE) | ADC_SMPR2_SMP_AN11(ADC_SAMPLING_RATE) | ADC_SMPR2_SMP_AN12(ADC_SAMPLING_RATE) | ADC_SMPR2_SMP_AN13(ADC_SAMPLING_RATE) | ADC_SMPR2_SMP_AN14(ADC_SAMPLING_RATE) | ADC_SMPR2_SMP_AN15(ADC_SAMPLING_RATE) | ADC_SMPR2_SMP_AN16(ADC_SAMPLING_RATE) | ADC_SMPR2_SMP_AN17(ADC_SAMPLING_RATE) | ADC_SMPR2_SMP_AN18(ADC_SAMPLING_RATE)},
@@ -239,6 +260,25 @@ __attribute__((weak)) adc_mux pinToMux(pin_t pin) {
         case C5:  return TO_MUX( ADC_CHANNEL_IN15, 0 );
         // STM32F103x[C-G] in 144-pin packages also have analog inputs on F6...F10, but they are on ADC3, and the
         // ChibiOS ADC driver for STM32F1xx currently supports only ADC1, therefore these pins are not usable.
+#elif defined(K20x)
+        case B0:  return TO_MUX( ADCx_SC1n_ADCH_AD8  | MUX_INPUT_SET_A,  0 );
+        case B1:  return TO_MUX( ADCx_SC1n_ADCH_AD9  | MUX_INPUT_SET_A,  0 );
+        case B2:  return TO_MUX( ADCx_SC1n_ADCH_AD12 | MUX_INPUT_SET_A,  0 );
+        case B3:  return TO_MUX( ADCx_SC1n_ADCH_AD13 | MUX_INPUT_SET_A,  0 );
+        case C0:  return TO_MUX( ADCx_SC1n_ADCH_AD14 | MUX_INPUT_SET_A,  0 );
+        case C1:  return TO_MUX( ADCx_SC1n_ADCH_AD15 | MUX_INPUT_SET_A,  0 );
+        case C2:  return TO_MUX( ADCx_SC1n_ADCH_AD4  | MUX_INPUT_SET_B,  0 );
+        case D1:  return TO_MUX( ADCx_SC1n_ADCH_AD5  | MUX_INPUT_SET_B,  0 );
+        case D5:  return TO_MUX( ADCx_SC1n_ADCH_AD6  | MUX_INPUT_SET_B,  0 );
+        case D6:  return TO_MUX( ADCx_SC1n_ADCH_AD7  | MUX_INPUT_SET_B,  0 );
+#if 0 // These pins won't work until ADC1 support is added to the ChibiOS driver
+        case E0:  return TO_MUX( ADCx_SC1n_ADCH_AD4  | MUX_INPUT_SET_A,  1 );
+        case E1:  return TO_MUX( ADCx_SC1n_ADCH_AD5  | MUX_INPUT_SET_A,  1 );
+        case C8:  return TO_MUX( ADCx_SC1n_ADCH_AD4  | MUX_INPUT_SET_B,  1 );
+        case C9:  return TO_MUX( ADCx_SC1n_ADCH_AD5  | MUX_INPUT_SET_B,  1 );
+        case C10: return TO_MUX( ADCx_SC1n_ADCH_AD6  | MUX_INPUT_SET_B,  1 );
+        case C11: return TO_MUX( ADCx_SC1n_ADCH_AD7  | MUX_INPUT_SET_B,  1 );
+#endif
 #endif
     }
 
@@ -249,7 +289,7 @@ __attribute__((weak)) adc_mux pinToMux(pin_t pin) {
 
 static inline ADCDriver* intToADCDriver(uint8_t adcInt) {
     switch (adcInt) {
-#if STM32_ADC_USE_ADC1
+#if STM32_ADC_USE_ADC1 || KINETIS_ADC_USE_ADC0
         case 0:
             return &ADCD1;
 #endif
@@ -297,6 +337,8 @@ int16_t adc_read(adc_mux mux) {
     adcConversionGroup.chselr = 1 << mux.input; /*no macro to convert N to ADC_CHSELR_CHSEL1*/
 #elif defined(USE_ADCV2)
     adcConversionGroup.sqr3 = ADC_SQR3_SQ1_N(mux.input);
+#elif defined(USE_KINETIS_ADCv1)
+    adcConversionGroup.channel_mask = 1U << (mux.input & MUX_INPUT_INDEX_MASK);
 #else
     adcConversionGroup.sqr[0] = ADC_SQR1_SQ1_N(mux.input);
 #endif
@@ -307,6 +349,13 @@ int16_t adc_read(adc_mux mux) {
     }
 
     manageAdcInitializationDriver(mux.adc, targetDriver);
+#if defined(USE_KINETIS_ADCv1)
+    if (mux.input & MUX_INPUT_SET_B) {
+        targetDriver->adc->CFG2 |= ADCx_CFG2_MUXSEL;
+    } else {
+        targetDriver->adc->CFG2 &= ~ADCx_CFG2_MUXSEL;
+    }
+#endif
     if (adcConvert(targetDriver, &adcConversionGroup, &sampleBuffer[0], ADC_BUFFER_DEPTH) != MSG_OK) {
         return 0;
     }
