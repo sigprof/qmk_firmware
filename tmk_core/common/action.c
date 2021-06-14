@@ -44,7 +44,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 int tp_buttons;
 
 #if defined(RETRO_TAPPING) || defined(RETRO_TAPPING_PER_KEY)
-int retro_tapping_counter = 0;
+static bool     last_keypress = false;
+static keypos_t last_keypress_key;
 #endif
 
 #ifdef IGNORE_MOD_TAP_INTERRUPT_PER_KEY
@@ -71,9 +72,6 @@ void action_exec(keyevent_t event) {
         dprint("EVENT: ");
         debug_event(event);
         dprintln();
-#if defined(RETRO_TAPPING) || defined(RETRO_TAPPING_PER_KEY)
-        retro_tapping_counter++;
-#endif
     }
 
     if (event.pressed) {
@@ -88,6 +86,20 @@ void action_exec(keyevent_t event) {
 #endif
 
     keyrecord_t record = {.event = event};
+
+#if defined(RETRO_TAPPING) || defined(RETRO_TAPPING_PER_KEY)
+    if (!IS_NOEVENT(event)) {
+        if (event.pressed) {
+            last_keypress     = true;
+            last_keypress_key = event.key;
+        } else {
+            if (last_keypress && KEYEQ(last_keypress_key, event.key)) {
+                record.tap.retro_tapping = true;
+            }
+            last_keypress = false;
+        }
+    }
+#endif
 
 #ifndef NO_ACTION_ONESHOT
 #    if (defined(ONESHOT_TIMEOUT) && (ONESHOT_TIMEOUT > 0))
@@ -683,27 +695,12 @@ void process_action(keyrecord_t *record, action_t action) {
 
 #ifndef NO_ACTION_TAPPING
 #    if defined(RETRO_TAPPING) || defined(RETRO_TAPPING_PER_KEY)
-    if (!is_tap_action(action)) {
-        retro_tapping_counter = 0;
-    } else {
-        if (event.pressed) {
-            if (tap_count > 0) {
-                retro_tapping_counter = 0;
-            }
-        } else {
-            if (tap_count > 0) {
-                retro_tapping_counter = 0;
-            } else {
-                if (
+    if (!event.pressed && (tap_count == 0) && record->tap.retro_tapping && is_tap_action(action)
 #        ifdef RETRO_TAPPING_PER_KEY
-                    get_retro_tapping(get_event_keycode(record->event, false), record) &&
+        && get_retro_tapping(get_event_keycode(record->event, false), record)
 #        endif
-                    retro_tapping_counter == 2) {
-                    tap_code(action.layer_tap.code);
-                }
-                retro_tapping_counter = 0;
-            }
-        }
+    ) {
+        tap_code(action.layer_tap.code);
     }
 #    endif
 #endif
