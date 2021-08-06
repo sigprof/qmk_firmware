@@ -205,4 +205,22 @@ bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
     }
 }
 
+static const uint16_t PROGMEM combo_prtsc[] = { KC_F9, KC_F10, COMBO_END };
+static const uint16_t PROGMEM combo_scrlk[] = { KC_F10, KC_F11, COMBO_END };
+static const uint16_t PROGMEM combo_pause[] = { KC_F11, KC_F12, COMBO_END };
+static const uint16_t PROGMEM combo_fapp[]  = { KC_INS, KC_DEL, COMBO_END };
+static const uint16_t PROGMEM combo_osrgu[] = { KC_COMM, KC_DOT, COMBO_END };
+static const uint16_t PROGMEM combo_osrct[] = { KC_DOT, KC_SLSH, COMBO_END };
+
+combo_t key_combos[] = {
+    COMBO(combo_prtsc, KC_PSCR),
+    COMBO(combo_scrlk, KC_SLCK),
+    COMBO(combo_pause, KC_PAUS),
+    COMBO(combo_fapp,  U_FAPP),
+    COMBO(combo_osrgu, U_OSRGU),
+    COMBO(combo_osrct, U_OSRCT),
+};
+
+uint16_t COMBO_LEN = sizeof(key_combos) / sizeof(key_combos[0]);
+
 /* vim:set sw=4 sta et: */
