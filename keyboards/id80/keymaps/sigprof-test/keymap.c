@@ -194,4 +194,15 @@ bool get_clear_oneshot_layer(uint16_t keycode, keyrecord_t *record, bool default
     return default_value;
 }
 
+bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case U_FCAPS:
+        case U_FAPP:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
 /* vim:set sw=4 sta et: */
