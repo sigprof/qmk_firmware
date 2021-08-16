@@ -10,6 +10,11 @@
 // Use the minimum possible I/O delay for the matrix to speed up scanning.
 #define MATRIX_IO_DELAY 1
 
+// Allow for some not so good switches (should not affect the latency too much
+// with `DEBOUNCE_TYPE = sym_eager_pk`).
+#undef DEBOUNCE
+#define DEBOUNCE 25
+
 // Select the hold action for a dual-use key immediately when another key is
 // pressed (this is different from PERMISSIVE_HOLD, which selects the hold
 // action when another key is pressed and then released).  The per-key option
