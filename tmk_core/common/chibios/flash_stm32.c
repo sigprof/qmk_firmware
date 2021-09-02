@@ -19,6 +19,11 @@
 #include <hal.h>
 #include "flash_stm32.h"
 
+#if defined(MCU_GD)
+/* GigaDevice GD32VF103 is a STM32F103 clone at heart. */
+#    include "gd32_compatibility.h"
+#endif
+
 #if defined(EEPROM_EMU_STM32F103xB)
 #    define FLASH_SR_WRPERR FLASH_SR_WRPRTERR
 #endif
