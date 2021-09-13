@@ -8,12 +8,14 @@ from argcomplete.completers import FilesCompleter
 from milc import cli
 from kle2xy import KLE2xy
 
-from qmk.converter import kle2qmk
+from qmk.converter import kle2qmk, kle_extract_matrix_pins
 from qmk.json_encoders import InfoJSONEncoder
 
 
 @cli.argument('filename', completer=FilesCompleter('.json'), help='The KLE raw txt to convert')
 @cli.argument('-f', '--force', action='store_true', help='Flag to overwrite current info.json')
+@cli.argument('-m', '--matrix', action='store_true', help='Flag to convert matrix pin information')
+@cli.argument('--row2col', action='store_true', help='Flag to use ROW2COL matrix')
 @cli.subcommand('Convert a KLE layout to a Configurator JSON', hidden=False if cli.config.user.developer else True)
 def kle2json(cli):
     """Convert a KLE layout to QMK's layout format.
@@ -40,16 +42,25 @@ def kle2json(cli):
         cli.log.error('Could not parse KLE raw data: %s', raw_code)
         cli.log.exception(e)
         return False
+    matrix = None
+    if cli.args.matrix:
+        matrix = kle_extract_matrix_pins(kle, cli.args.row2col)
     keyboard = {
         'keyboard_name': kle.name,
         'url': '',
         'maintainer': 'qmk',
         'layouts': {
             'LAYOUT': {
-                'layout': kle2qmk(kle)
+                'layout': kle2qmk(kle, matrix, cli.args.row2col)
             }
         },
     }
+    if matrix:
+        keyboard['matrix_pins'] = matrix
+        if cli.args.row2col:
+            keyboard['diode_direction'] = 'ROW2COL'
+        else:
+            keyboard['diode_direction'] = 'COL2ROW'
 
     # Write our info.json
     keyboard = json.dumps(keyboard, indent=4, separators=(', ', ': '), sort_keys=False, cls=InfoJSONEncoder)
