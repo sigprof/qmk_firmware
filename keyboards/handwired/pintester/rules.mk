@@ -19,5 +19,8 @@ SPACE_CADET_ENABLE = no
 MAGIC_ENABLE = no
 GRAVE_ESC_ENABLE = no
 
+# Allow overriding some options from the make command line
+OPT_DEFS += $(if $(PINTESTER_IGNORE_PINS),-DPINTESTER_IGNORE_PINS="$(PINTESTER_IGNORE_PINS)")
+
 CUSTOM_MATRIX = lite
 SRC += matrix.c
