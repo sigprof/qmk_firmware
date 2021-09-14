@@ -2,6 +2,7 @@
 """
 from collections import OrderedDict
 from types import SimpleNamespace
+import hjson
 import re
 
 
@@ -91,3 +92,46 @@ def kle2qmk(kle, matrix_pins = None, row2col = False):
             layout.append(qmk_key)
 
     return layout
+
+def kle_raw_to_via(kle_raw_str, matrix_pins, row2col):
+    """Convert raw KLE data to VIA JSON with matrix location info.
+    """
+    # Wrap KLE raw data in a dictionary so hjson will parse it
+    kle_json_str = '{"layout": [' + kle_raw_str + ']}'
+    kle_rows = hjson.loads(kle_json_str)['layout']
+
+    # Get matrix size
+    if 'direct' in matrix_pins:
+        matrix_rows = 1
+        matrix_cols = len(matrix_pins['direct'])
+    else:
+        matrix_rows = len(matrix_pins['rows'])
+        matrix_cols = len(matrix_pins['cols'])
+
+    # Process raw KLE data, replacing the key labels with matrix locations
+    via_keymap = []
+    for kle_row in kle_rows:
+        via_row = []
+        for kle_entry in kle_row:
+            if isinstance(kle_entry, str):
+                pins = kle_parse_pins_from_name(kle_entry, row2col)
+                matrix = None
+                if pins:
+                    if pins.direct:
+                        matrix = [ 0, matrix_pins['direct'].index(pins.pin) ]
+                    else:
+                        matrix = [ matrix_pins['rows'].index(pins.row), matrix_pins['cols'].index(pins.col) ]
+                if matrix:
+                    kle_entry = '%d,%d' % tuple(matrix)
+            via_row.append(kle_entry)
+        via_keymap.append(via_row)
+
+    # Wrap the keymap into the structure required by VIA
+    return OrderedDict(
+        name = '<TODO>',
+        vendorId = '<TODO>',
+        productId = '<TODO>',
+        lighting = '<TODO>',
+        matrix = OrderedDict(rows = matrix_rows, cols = matrix_cols),
+        layouts = OrderedDict(keymap = via_keymap)
+    )

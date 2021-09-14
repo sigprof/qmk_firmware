@@ -8,7 +8,7 @@ from argcomplete.completers import FilesCompleter
 from milc import cli
 from kle2xy import KLE2xy
 
-from qmk.converter import kle2qmk, kle_extract_matrix_pins
+from qmk.converter import kle2qmk, kle_extract_matrix_pins, kle_raw_to_via
 from qmk.json_encoders import InfoJSONEncoder
 
 
@@ -16,10 +16,18 @@ from qmk.json_encoders import InfoJSONEncoder
 @cli.argument('-f', '--force', action='store_true', help='Flag to overwrite current info.json')
 @cli.argument('-m', '--matrix', action='store_true', help='Flag to convert matrix pin information')
 @cli.argument('--row2col', action='store_true', help='Flag to use ROW2COL matrix')
+@cli.argument('--via', action='store_true', help='Flag to write a VIA JSON with matrix layout info')
 @cli.subcommand('Convert a KLE layout to a Configurator JSON', hidden=False if cli.config.user.developer else True)
 def kle2json(cli):
     """Convert a KLE layout to QMK's layout format.
-    """  # If filename is a path
+    """
+    if cli.args.row2col and not cli.args.matrix:
+        cli.log.error('The --row2col option requires --matrix')
+        return False
+    if cli.args.via and not cli.args.matrix:
+        cli.log.error('The --via option requires --matrix')
+        return False
+    # If filename is a path
     if cli.args.filename.startswith("/") or cli.args.filename.startswith("./"):
         file_path = Path(cli.args.filename)
     # Otherwise assume it is a file name
@@ -35,6 +43,10 @@ def kle2json(cli):
     if Path(out_path, "info.json").exists() and not cli.args.force:
         cli.log.error('File {fg_cyan}%s/info.json{style_reset_all} already exists, use -f or --force to overwrite.', out_path)
         return False
+    if cli.args.via:
+        if Path(out_path, "via.json").exists() and not cli.args.force:
+            cli.log.error('File {fg_cyan}%s/via.json{style_reset_all} already exists, use -f or --force to overwrite.', out_path)
+            return False
     try:
         # Convert KLE raw to x/y coordinates (using kle2xy package from skullydazed)
         kle = KLE2xy(raw_code)
@@ -68,3 +80,10 @@ def kle2json(cli):
 
     info_json_file.write_text(keyboard)
     cli.log.info('Wrote out {fg_cyan}%s/info.json', out_path)
+
+    if cli.args.via:
+        via_json = kle_raw_to_via(raw_code, matrix, cli.args.row2col)
+        via_json_str = json.dumps(via_json, indent=2, separators=(',', ': '), sort_keys=False)
+        via_json_file = out_path / 'via.json'
+        via_json_file.write_text(via_json_str)
+        cli.log.info('Wrote out {fg_cyan}%s/via.json', out_path)
