@@ -12,9 +12,9 @@
         "nkro": true
     },
     "usb": {
-        "device_ver": "0x0002",
-        "pid": "0x4B50",
-        "vid": "0x6002"
+        "vid": "0x4B50",
+        "pid": "0x3C02",
+        "device_ver": "0x0002"
     },
     "community_layouts": ["60_ansi_arrow"],
     "diode_direction": "ROW2COL",
