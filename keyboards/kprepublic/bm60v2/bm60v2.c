@@ -2,6 +2,12 @@
 
 #ifdef RGB_MATRIX_ENABLE
 
+#    include <i2c_master.h>
+#    include <is31fl3733.h>
+#    include <ws2812.h>
+
+// clang-format off
+
 // Dummy IS31FL3733 config for testing - enables all possible LED locations
 const is31_led __flash g_is31_leds[DRIVER_LED_TOTAL] = {
     { 0, A_1, B_1, C_1 },
@@ -89,5 +95,63 @@ led_config_t g_led_config = {
         [0 ... DRIVER_LED_TOTAL-1] = 4
     }
 };
+// clang-format on
+
+// ==========================================================================
+// Custom RGB Matrix driver that combines IS31FL3733 and WS2812
+// ==========================================================================
+
+#    if WS2812_LED_TOTAL > 0
+LED_TYPE rgb_matrix_ws2812_array[WS2812_LED_TOTAL];
+#    endif
+
+static void rgb_matrix_driver_init(void) {
+    i2c_init();
+    IS31FL3733_init(DRIVER_ADDR_1, 0);
+    for (uint8_t index = 0; index < ISSI_LED_TOTAL; index++) {
+        bool enabled = true;
+        IS31FL3733_set_led_control_register(index, enabled, enabled, enabled);
+    }
+    IS31FL3733_update_led_control_registers(DRIVER_ADDR_1, 0);
+}
+
+static void rgb_matrix_driver_flush(void) {
+    IS31FL3733_update_pwm_buffers(DRIVER_ADDR_1, 0);
+#    if WS2812_LED_TOTAL > 0
+    ws2812_setleds(rgb_matrix_ws2812_array, WS2812_LED_TOTAL);
+#    endif
+}
+
+static void rgb_matrix_driver_set_color(int index, uint8_t red, uint8_t green, uint8_t blue) {
+    if (index < ISSI_LED_TOTAL) {
+        IS31FL3733_set_color(index, red, green, blue);
+    } else {
+#    if WS2812_LED_TOTAL > 0
+        rgb_matrix_ws2812_array[index - ISSI_LED_TOTAL].r = red;
+        rgb_matrix_ws2812_array[index - ISSI_LED_TOTAL].g = green;
+        rgb_matrix_ws2812_array[index - ISSI_LED_TOTAL].b = blue;
+#    endif
+    }
+}
+
+static void rgb_matrix_driver_set_color_all(uint8_t red, uint8_t green, uint8_t blue) {
+    IS31FL3733_set_color_all(red, green, blue);
+#    if WS2812_LED_TOTAL > 0
+    for (uint8_t i = 0; i < WS2812_LED_TOTAL; i++) {
+        rgb_matrix_ws2812_array[i].r = red;
+        rgb_matrix_ws2812_array[i].g = green;
+        rgb_matrix_ws2812_array[i].b = blue;
+    }
+#    endif
+}
+
+// clang-format off
+const rgb_matrix_driver_t rgb_matrix_driver = {
+    .init          = rgb_matrix_driver_init,
+    .flush         = rgb_matrix_driver_flush,
+    .set_color     = rgb_matrix_driver_set_color,
+    .set_color_all = rgb_matrix_driver_set_color_all,
+};
+// clang-format on
 
 #endif /* RGB_MATRIX_ENABLE */
