@@ -13,7 +13,7 @@
     },
     "usb": {
         "vid": "0x4B50",
-        "pid": "0x3C02",
+        "pid": "0x1121",
         "device_ver": "0x0002"
     },
     "community_layouts": ["60_ansi_arrow"],
