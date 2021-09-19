@@ -5,7 +5,7 @@
 // Configure the IS31FL3733 driver for per-key RGB LEDs
 #define DRIVER_COUNT 1
 #define DRIVER_ADDR_1 0b1010000
-#define DRIVER_1_LED_TOTAL 64 /* FIXME */
+#define DRIVER_1_LED_TOTAL 63
 
 #define ISSI_LED_TOTAL DRIVER_1_LED_TOTAL
 
