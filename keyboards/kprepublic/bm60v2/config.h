@@ -2,6 +2,12 @@
 
 #include "config_common.h"
 
+// Note: The RGB LED driver configuration is not inside #ifdef blocks, so that
+// the driver code would still compile even without RGBLIGHT_ENABLE and
+// RGB_MATRIX_ENABLE (usually this is not required, but with the custom
+// IS31FL3733+WS2812 driver setup used by this board the LED controller drivers
+// are compiled unconditionally).
+
 // Configure the IS31FL3733 driver for per-key RGB LEDs
 #define DRIVER_COUNT 1
 #define DRIVER_ADDR_1 0b1010000
