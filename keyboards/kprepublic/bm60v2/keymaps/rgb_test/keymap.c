@@ -105,7 +105,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t* record) {
                     // IS31FL3733-specific code here
                     is31_led led = g_is31_leds[rgb_led_index];
                     uint8_t  reg = (rgb_color_index == 0) ? led.r : ((rgb_color_index == 1) ? led.g : led.b);
-                    sprintf(send_buf, "%d,%c_%d", led.driver, 'A' + (reg >> 4), reg & 0x0F);
+                    sprintf(send_buf, "%d,%c_%d", led.driver, 'A' + (reg >> 4), (reg & 0x0F) + 1);
                 } else {
                     static const char colors[3] = {'R', 'G', 'B'};
                     sprintf(send_buf, "+%d,%c", rgb_led_index - ISSI_LED_TOTAL, colors[rgb_color_index]);
