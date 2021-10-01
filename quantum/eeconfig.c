@@ -39,6 +39,31 @@ __attribute__((weak)) void eeconfig_init_kb(void) {
     eeconfig_init_user();
 }
 
+static const PROGMEM uint8_t eeprom_clear_offsets[] = {
+    (uintptr_t)EECONFIG_DEBUG,
+    (uintptr_t)EECONFIG_DEFAULT_LAYER,
+    (uintptr_t)EECONFIG_KEYMAP_LOWER_BYTE,
+    (uintptr_t)EECONFIG_KEYMAP_UPPER_BYTE,
+    (uintptr_t)EECONFIG_MOUSEKEY_ACCEL,
+    (uintptr_t)EECONFIG_BACKLIGHT,
+    (uintptr_t)EECONFIG_RGBLIGHT,
+    (uintptr_t)EECONFIG_RGBLIGHT + 1,
+    (uintptr_t)EECONFIG_RGBLIGHT + 2,
+    (uintptr_t)EECONFIG_RGBLIGHT + 3,
+    (uintptr_t)EECONFIG_STENOMODE,
+    (uintptr_t)EECONFIG_HAPTIC,
+    (uintptr_t)EECONFIG_HAPTIC + 1,
+    (uintptr_t)EECONFIG_HAPTIC + 2,
+    (uintptr_t)EECONFIG_HAPTIC + 3,
+    (uintptr_t)EECONFIG_VELOCIKEY,
+    (uintptr_t)EECONFIG_RGB_MATRIX,
+    (uintptr_t)EECONFIG_RGB_MATRIX + 1,
+    (uintptr_t)EECONFIG_RGB_MATRIX + 2,
+    (uintptr_t)EECONFIG_RGB_MATRIX + 3,
+    (uintptr_t)EECONFIG_RGB_MATRIX_EXTENDED,
+    (uintptr_t)EECONFIG_RGB_MATRIX_EXTENDED + 1,
+};
+
 /*
  * FIXME: needs doc
  */
@@ -49,21 +74,13 @@ void eeconfig_init_quantum(void) {
 #if defined(EEPROM_DRIVER)
     eeprom_driver_erase();
 #endif
+    for (uint8_t i = 0; i < sizeof(eeprom_clear_offsets) / sizeof(eeprom_clear_offsets[0]); ++i) {
+        uint8_t offset = pgm_read_byte(&eeprom_clear_offsets[i]);
+        eeprom_update_byte((uint8_t *)(uintptr_t)offset, 0);
+    }
     eeprom_update_word(EECONFIG_MAGIC, EECONFIG_MAGIC_NUMBER);
-    eeprom_update_byte(EECONFIG_DEBUG, 0);
-    eeprom_update_byte(EECONFIG_DEFAULT_LAYER, 0);
     default_layer_state = 0;
-    eeprom_update_byte(EECONFIG_KEYMAP_LOWER_BYTE, 0);
-    eeprom_update_byte(EECONFIG_KEYMAP_UPPER_BYTE, 0);
-    eeprom_update_byte(EECONFIG_MOUSEKEY_ACCEL, 0);
-    eeprom_update_byte(EECONFIG_BACKLIGHT, 0);
     eeprom_update_byte(EECONFIG_AUDIO, 0xFF);  // On by default
-    eeprom_update_dword(EECONFIG_RGBLIGHT, 0);
-    eeprom_update_byte(EECONFIG_STENOMODE, 0);
-    eeprom_update_dword(EECONFIG_HAPTIC, 0);
-    eeprom_update_byte(EECONFIG_VELOCIKEY, 0);
-    eeprom_update_dword(EECONFIG_RGB_MATRIX, 0);
-    eeprom_update_word(EECONFIG_RGB_MATRIX_EXTENDED, 0);
 
     // TODO: Remove once ARM has a way to configure EECONFIG_HANDEDNESS
     //        within the emulated eeprom via dfu-util or another tool
@@ -77,11 +94,6 @@ void eeconfig_init_quantum(void) {
 
 #if defined(HAPTIC_ENABLE)
     haptic_reset();
-#else
-    // this is used in case haptic is disabled, but we still want sane defaults
-    // in the haptic configuration eeprom. All zero will trigger a haptic_reset
-    // when a haptic-enabled firmware is loaded onto the keyboard.
-    eeprom_update_dword(EECONFIG_HAPTIC, 0);
 #endif
 #if defined(VIA_ENABLE)
     // Invalidate VIA eeprom config, and then reset.
