@@ -24,7 +24,6 @@
 #define PRODUCT_ID   0x6480
 #define DEVICE_VER   0x0001
 #define MANUFACTURER QMK
-#define PRODUCT      Pin Tester
 
 /*
  * Key matrix configuration parameters are set in config.h files for specific

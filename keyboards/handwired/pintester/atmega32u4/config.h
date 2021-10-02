@@ -19,6 +19,8 @@
 
 #include "config_common.h"
 
+#define PRODUCT Pin Tester ATmega32U4
+
 /*
  * List of all GPIO pins available for the keyboard matrix.  Each element of
  * the list must be one of the following macros:
