@@ -1,0 +1,4 @@
+LTO_ENABLE = yes
+RGBLIGHT_ENABLE = yes
+
+LAYOUTS = 64_ansi
