@@ -34,10 +34,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define RGB_DI_PIN B15
 #define RGBLED_NUM 3
-#define WS2812_SPI SPID2
-#define WS2812_SPI_MOSI_PAL_MODE 0
-#define WS2812_SPI_SCK_PAL_MODE 0
-#define WS2812_SPI_SCK_PIN B13
+#define WS2812_PWM_DRIVER PWMD1
+#define WS2812_PWM_CHANNEL 3
+#define WS2812_PWM_PAL_MODE 2
+#define WS2812_PWM_COMPLEMENTARY_OUTPUT
+#define WS2812_PWM_DMA_STREAM STM32_DMA1_STREAM5
+
+#define WS2812_PWM_TARGET_PERIOD (1000000000 / 1325) /* normally should be 1e9/1250 = 800000 */
 
 /* Set 0 if debouncing isn't needed */
 #define DEBOUNCE    5
