@@ -11,12 +11,13 @@ __attribute__((weak)) void oled_task_user(void) {
     if (!is_oled_on()) {
         return;
     }
-    oled_clear();
-    if (clock_set_mode) {
-        draw_clock();
-        return;
-    }
-    switch (oled_mode) {
+    uint8_t current_oled_mode = clock_set_mode ? OLED_TIME : oled_mode;
+    static uint8_t old_oled_mode = OLED_OFF;
+    if (current_oled_mode != old_oled_mode) {
+        old_oled_mode = current_oled_mode;
+        oled_clear();
+    };
+    switch (current_oled_mode) {
         default:
         case OLED_DEFAULT:
             draw_default();
@@ -136,22 +137,25 @@ void draw_default() {
     for (uint8_t x = 0; x < MATRIX_ROWS; x++) {
         for (uint8_t y = 0; y < MATRIX_COLS; y++) {
             bool on = (matrix_get_row(x) & (1 << y)) > 0;
+	    if (x == 0 && y >= 12) {
+                on = true; // OLED location
+            }
             oled_write_pixel(MATRIX_DISPLAY_X + y + 2, MATRIX_DISPLAY_Y + x + 2, on);
         }
     }
 
     // outline
-    draw_line_h(MATRIX_DISPLAY_X, MATRIX_DISPLAY_Y, 19);
-    draw_line_h(MATRIX_DISPLAY_X, MATRIX_DISPLAY_Y + 9, 19);
-    draw_line_v(MATRIX_DISPLAY_X, MATRIX_DISPLAY_Y, 9);
-    draw_line_v(MATRIX_DISPLAY_X + 19, MATRIX_DISPLAY_Y, 9);
+    draw_line_h(MATRIX_DISPLAY_X + 1, MATRIX_DISPLAY_Y, 18);
+    draw_line_h(MATRIX_DISPLAY_X + 1, MATRIX_DISPLAY_Y + 9, 18);
+    draw_line_v(MATRIX_DISPLAY_X, MATRIX_DISPLAY_Y + 1, 8);
+    draw_line_v(MATRIX_DISPLAY_X + 19, MATRIX_DISPLAY_Y + 1, 8);
 
     // oled location
-    draw_line_h(MATRIX_DISPLAY_X + 14, MATRIX_DISPLAY_Y + 2, 3);
+    //draw_line_h(MATRIX_DISPLAY_X + 14, MATRIX_DISPLAY_Y + 2, 3);
 
     // bodge extra lines for invert layer and enc mode
-    draw_line_v(35, 0, 8);
-    draw_line_v(71, 0, 8);
+    //draw_line_v(35, 0, 8);
+    //draw_line_v(71, 0, 8);
 }
 
 void draw_clock() {
@@ -194,8 +198,8 @@ void draw_clock() {
     }
 
     // bodge extra lines for invert layer and enc mode
-    draw_line_v(101, 0, 8);
-    draw_line_v(113, 8, 8);
+    //draw_line_v(101, 0, 8);
+    //draw_line_v(113, 8, 8);
 }
 
 #endif
