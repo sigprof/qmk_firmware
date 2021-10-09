@@ -375,11 +375,15 @@ void housekeeping_task_kb(void) {
     last_minute = minutes_since_midnight;
   }
 
-  if((oled_mode == OLED_OFF) && is_oled_on()){
-      oled_off();
-  }
-  if((oled_mode != OLED_OFF) && !is_oled_on()){
-      oled_on();
+  static uint8_t old_oled_mode = OLED_OFF;
+  if (oled_mode != old_oled_mode) {
+      old_oled_mode = oled_mode;
+      if ((oled_mode == OLED_OFF) && is_oled_on()) {
+          oled_off();
+      }
+      if ((oled_mode != OLED_OFF) && !is_oled_on()) {
+          oled_on();
+      }
   }
 }
 
