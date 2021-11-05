@@ -20,11 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "config_common.h"
 
 /* USB Device descriptor parameter */
-#define VENDOR_ID    0x4B50 //KP
-#define PRODUCT_ID   0xEF6E
-#define DEVICE_VER   0x0002
-#define MANUFACTURER KPRepublic
-#define PRODUCT      BM65 RGB
+// #define VENDOR_ID    0x4B50 //KP
+// #define PRODUCT_ID   0xEF6E
+// #define DEVICE_VER   0x0002
+// #define MANUFACTURER KPRepublic
+// #define PRODUCT      BM65 RGB
 
 /* key matrix size */
 // #define MATRIX_ROWS 5
@@ -44,7 +44,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define UNUSED_PINS
 
 /* COL2ROW, ROW2COL */
-#define DIODE_DIRECTION COL2ROW
+//#define DIODE_DIRECTION COL2ROW
 
 // The pin connected to the data pin of the LEDs
 #define RGB_DI_PIN E2
@@ -56,7 +56,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 /* Debounce reduces chatter (unintended double-presses) - set 0 if debouncing is not needed */
-#define DEBOUNCE 5
+//#define DEBOUNCE 5
 
 /* define if matrix has ghost (lacks anti-ghosting diodes) */
 //#define MATRIX_HAS_GHOST
