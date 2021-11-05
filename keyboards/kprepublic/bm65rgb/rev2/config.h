@@ -117,10 +117,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#define BOOTMAGIC_LITE_COLUMN 0
 
 
-// Configure the IS31FL3733 driver for per-key RGB LEDs
+// Configure the IS31FL3741 driver for per-key RGB LEDs
 #define DRIVER_COUNT 1
-#define DRIVER_ADDR_1 0b1010000
-#define DRIVER_1_LED_TOTAL 64 /* FIXME */
+#define DRIVER_ADDR_1 0b0110000
+#define DRIVER_ADDR_2 0b0110000
+#define DRIVER_1_LED_TOTAL 67 /* FIXME */
 
 #define ISSI_LED_TOTAL DRIVER_1_LED_TOTAL
 

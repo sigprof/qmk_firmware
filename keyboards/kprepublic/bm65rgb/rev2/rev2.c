@@ -18,77 +18,86 @@
 
 #ifdef RGB_MATRIX_ENABLE
 #    include <i2c_master.h>
-#    include <is31fl3733.h>
+#    include <is31fl3741.h>
 #    include <ws2812.h>
 
 // clang-format off
 
 // Dummy IS31FL3733 config for testing - enables all possible LED locations
 const is31_led __flash g_is31_leds[DRIVER_LED_TOTAL] = {
-    { 0, A_1, B_1, C_1 },
-    { 0, A_2, B_2, C_2 },
-    { 0, A_3, B_3, C_3 },
-    { 0, A_4, B_4, C_4 },
-    { 0, A_5, B_5, C_5 },
-    { 0, A_6, B_6, C_6 },
-    { 0, A_7, B_7, C_7 },
-    { 0, A_8, B_8, C_8 },
-    { 0, A_9, B_9, C_9 },
-    { 0, A_10, B_10, C_10 },
-    { 0, A_11, B_11, C_11 },
-    { 0, A_12, B_12, C_12 },
-    { 0, A_13, B_13, C_13 },
-    { 0, A_14, B_14, C_14 },
-    { 0, A_15, B_15, C_15 },
-    { 0, A_16, B_16, C_16 },
-    { 0, D_1, E_1, F_1 },
-    { 0, D_2, E_2, F_2 },
-    { 0, D_3, E_3, F_3 },
-    { 0, D_4, E_4, F_4 },
-    { 0, D_5, E_5, F_5 },
-    { 0, D_6, E_6, F_6 },
-    { 0, D_7, E_7, F_7 },
-    { 0, D_8, E_8, F_8 },
-    { 0, D_9, E_9, F_9 },
-    { 0, D_10, E_10, F_10 },
-    { 0, D_11, E_11, F_11 },
-    { 0, D_12, E_12, F_12 },
-    { 0, D_13, E_13, F_13 },
-    { 0, D_14, E_14, F_14 },
-    { 0, D_15, E_15, F_15 },
-    { 0, D_16, E_16, F_16 },
-    { 0, G_1, H_1, I_1 },
-    { 0, G_2, H_2, I_2 },
-    { 0, G_3, H_3, I_3 },
-    { 0, G_4, H_4, I_4 },
-    { 0, G_5, H_5, I_5 },
-    { 0, G_6, H_6, I_6 },
-    { 0, G_7, H_7, I_7 },
-    { 0, G_8, H_8, I_8 },
-    { 0, G_9, H_9, I_9 },
-    { 0, G_10, H_10, I_10 },
-    { 0, G_11, H_11, I_11 },
-    { 0, G_12, H_12, I_12 },
-    { 0, G_13, H_13, I_13 },
-    { 0, G_14, H_14, I_14 },
-    { 0, G_15, H_15, I_15 },
-    { 0, G_16, H_16, I_16 },
-    { 0, J_1, K_1, L_1 },
-    { 0, J_2, K_2, L_2 },
-    { 0, J_3, K_3, L_3 },
-    { 0, J_4, K_4, L_4 },
-    { 0, J_5, K_5, L_5 },
-    { 0, J_6, K_6, L_6 },
-    { 0, J_7, K_7, L_7 },
-    { 0, J_8, K_8, L_8 },
-    { 0, J_9, K_9, L_9 },
-    { 0, J_10, K_10, L_10 },
-    { 0, J_11, K_11, L_11 },
-    { 0, J_12, K_12, L_12 },
-    { 0, J_13, K_13, L_13 },
-    { 0, J_14, K_14, L_14 },
-    { 0, J_15, K_15, L_15 },
-    { 0, J_16, K_16, L_16 },
+    {0, CS21_SW1, CS20_SW1, CS19_SW1},
+    {0, CS21_SW2, CS20_SW2, CS19_SW2},
+    {0, CS21_SW3, CS20_SW3, CS19_SW3},
+    {0, CS21_SW4, CS20_SW4, CS19_SW4},
+    {0, CS21_SW5, CS20_SW5, CS19_SW5},
+    {0, CS21_SW6, CS20_SW6, CS19_SW6},
+    {0, CS21_SW7, CS20_SW7, CS19_SW7},
+    {0, CS21_SW8, CS20_SW8, CS19_SW8},
+    {0, CS24_SW1, CS23_SW1, CS22_SW1},
+    {0, CS24_SW2, CS23_SW2, CS22_SW2},
+    {0, CS24_SW3, CS23_SW3, CS22_SW3},
+    {0, CS24_SW4, CS23_SW4, CS22_SW4},
+    {0, CS24_SW5, CS23_SW5, CS22_SW5},
+    {0, CS24_SW6, CS23_SW6, CS22_SW6},
+    {0, CS24_SW7, CS23_SW7, CS22_SW7},
+
+    {0, CS15_SW1, CS14_SW1, CS13_SW1},
+    {0, CS15_SW2, CS14_SW2, CS13_SW2},
+    {0, CS15_SW3, CS14_SW3, CS13_SW3},
+    {0, CS15_SW4, CS14_SW4, CS13_SW4},
+    {0, CS15_SW5, CS14_SW5, CS13_SW5},
+    {0, CS15_SW6, CS14_SW6, CS13_SW6},
+    {0, CS15_SW7, CS14_SW7, CS13_SW7},
+    {0, CS15_SW8, CS14_SW8, CS13_SW8},
+    {0, CS30_SW1, CS29_SW1, CS28_SW1},
+    {0, CS30_SW2, CS29_SW2, CS28_SW2},
+    {0, CS30_SW3, CS29_SW3, CS28_SW3},
+    {0, CS30_SW4, CS29_SW4, CS28_SW4},
+    {0, CS30_SW5, CS29_SW5, CS28_SW5},
+    {0, CS30_SW6, CS29_SW6, CS28_SW6},
+    {0, CS30_SW7, CS29_SW7, CS28_SW7},
+
+    {0, CS12_SW1, CS11_SW1, CS10_SW1},
+    {0, CS12_SW2, CS11_SW2, CS10_SW2},
+    {0, CS12_SW3, CS11_SW3, CS10_SW3},
+    {0, CS12_SW4, CS11_SW4, CS10_SW4},
+    {0, CS12_SW5, CS11_SW5, CS10_SW5},
+    {0, CS12_SW6, CS11_SW6, CS10_SW6},
+    {0, CS12_SW7, CS11_SW7, CS10_SW7},
+    {0, CS12_SW8, CS11_SW8, CS10_SW8},
+    {0, CS33_SW1, CS32_SW1, CS31_SW1},
+    {0, CS33_SW2, CS32_SW2, CS31_SW2},
+    {0, CS33_SW3, CS32_SW3, CS31_SW3},
+    {0, CS33_SW4, CS32_SW4, CS31_SW4},
+    {0, CS33_SW5, CS32_SW5, CS31_SW5},
+    {0, CS33_SW7, CS32_SW7, CS31_SW7},
+
+    {0, CS9_SW1, CS8_SW1, CS7_SW1},
+    {0, CS9_SW2, CS8_SW2, CS7_SW2},
+    {0, CS9_SW3, CS8_SW3, CS7_SW3},
+    {0, CS9_SW4, CS8_SW4, CS7_SW4},
+    {0, CS9_SW5, CS8_SW5, CS7_SW5},
+    {0, CS9_SW6, CS8_SW6, CS7_SW6},
+    {0, CS9_SW7, CS8_SW7, CS7_SW7},
+    {0, CS9_SW8, CS8_SW8, CS7_SW8},
+    {0, CS36_SW1, CS35_SW1, CS34_SW1},
+    {0, CS36_SW2, CS35_SW2, CS34_SW2},
+    {0, CS36_SW3, CS35_SW3, CS34_SW3},
+    {0, CS36_SW4, CS35_SW4, CS34_SW4},
+    {0, CS36_SW5, CS35_SW5, CS34_SW5},
+    {0, CS36_SW7, CS35_SW7, CS34_SW7},
+
+    {0, CS3_SW1, CS2_SW1, CS1_SW1},
+    {0, CS3_SW2, CS2_SW2, CS1_SW2},
+    {0, CS3_SW3, CS2_SW3, CS1_SW3},
+    {0, CS3_SW6, CS2_SW6, CS1_SW6},
+    {0, CS39_SW1, CS38_SW1, CS37_SW1},
+    {0, CS39_SW2, CS38_SW2, CS37_SW2},
+    {0, CS39_SW3, CS38_SW3, CS37_SW3},
+    {0, CS39_SW4, CS38_SW4, CS37_SW4},
+    {0, CS39_SW5, CS38_SW5, CS37_SW5},
+    {0, CS39_SW7, CS38_SW7, CS37_SW7}
+
 };
 
 // Dummy RGB Matrix config for testing
@@ -112,54 +121,5 @@ led_config_t g_led_config = {
 };
 // clang-format on
 
-// ==========================================================================
-// Custom RGB Matrix driver that combines IS31FL3733 and WS2812
-// ==========================================================================
-#    if WS2812_LED_TOTAL > 0
-LED_TYPE rgb_matrix_ws2812_array[WS2812_LED_TOTAL];
-#    endif
-static void rgb_matrix_driver_init(void) {
-    i2c_init();
-    IS31FL3733_init(DRIVER_ADDR_1, 0);
-    for (uint8_t index = 0; index < ISSI_LED_TOTAL; index++) {
-        bool enabled = true;
-        IS31FL3733_set_led_control_register(index, enabled, enabled, enabled);
-    }
-    IS31FL3733_update_led_control_registers(DRIVER_ADDR_1, 0);
-}
-static void rgb_matrix_driver_flush(void) {
-    IS31FL3733_update_pwm_buffers(DRIVER_ADDR_1, 0);
-#    if WS2812_LED_TOTAL > 0
-    ws2812_setleds(rgb_matrix_ws2812_array, WS2812_LED_TOTAL);
-#    endif
-}
-static void rgb_matrix_driver_set_color(int index, uint8_t red, uint8_t green, uint8_t blue) {
-    if (index < ISSI_LED_TOTAL) {
-        IS31FL3733_set_color(index, red, green, blue);
-    } else {
-#    if WS2812_LED_TOTAL > 0
-        rgb_matrix_ws2812_array[index - ISSI_LED_TOTAL].r = red;
-        rgb_matrix_ws2812_array[index - ISSI_LED_TOTAL].g = green;
-        rgb_matrix_ws2812_array[index - ISSI_LED_TOTAL].b = blue;
-#    endif
-    }
-}
-static void rgb_matrix_driver_set_color_all(uint8_t red, uint8_t green, uint8_t blue) {
-    IS31FL3733_set_color_all(red, green, blue);
-#    if WS2812_LED_TOTAL > 0
-    for (uint8_t i = 0; i < WS2812_LED_TOTAL; i++) {
-        rgb_matrix_ws2812_array[i].r = red;
-        rgb_matrix_ws2812_array[i].g = green;
-        rgb_matrix_ws2812_array[i].b = blue;
-    }
-#    endif
-}
-// clang-format off
-const rgb_matrix_driver_t rgb_matrix_driver = {
-    .init          = rgb_matrix_driver_init,
-    .flush         = rgb_matrix_driver_flush,
-    .set_color     = rgb_matrix_driver_set_color,
-    .set_color_all = rgb_matrix_driver_set_color_all,
-};
-// clang-format on
+
 #endif /* RGB_MATRIX_ENABLE */

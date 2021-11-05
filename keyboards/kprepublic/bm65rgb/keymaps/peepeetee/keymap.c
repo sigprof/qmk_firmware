@@ -17,7 +17,7 @@
  */
 #include QMK_KEYBOARD_H
 
-#include <is31fl3733.h>
+#include <is31fl3741.h>
 
 enum custom_keycodes {
     RT_TOGG = SAFE_RANGE,
