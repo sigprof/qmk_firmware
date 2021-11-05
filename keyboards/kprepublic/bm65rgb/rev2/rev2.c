@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rev2.h"
+#include QMK_KEYBOARD_H
 
 #ifdef RGB_MATRIX_ENABLE
 #    include <i2c_master.h>

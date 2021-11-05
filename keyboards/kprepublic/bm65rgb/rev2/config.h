@@ -49,9 +49,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // The pin connected to the data pin of the LEDs
 #define RGB_DI_PIN E2
 // The number of LEDs connected
-#define DRIVER_LED_TOTAL 73
+//#define DRIVER_LED_TOTAL 73
 #ifdef RGB_DI_PIN
-    #define RGBLED_NUM 73
+    #define RGBLED_NUM 6
     #define RGB_MATRIX_KEYPRESSES // reacts to keypresses
 #endif
 
@@ -115,3 +115,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /* Bootmagic Lite key configuration */
 //#define BOOTMAGIC_LITE_ROW 0
 //#define BOOTMAGIC_LITE_COLUMN 0
+
+
+// Configure the IS31FL3733 driver for per-key RGB LEDs
+#define DRIVER_COUNT 1
+#define DRIVER_ADDR_1 0b1010000
+#define DRIVER_1_LED_TOTAL 64 /* FIXME */
+
+#define ISSI_LED_TOTAL DRIVER_1_LED_TOTAL
+
+// Underglow LEDs are WS2812, but someone might want to use RGBLIGHT for them;
+// don't use those LEDs in RGB Matrix in that case.
+#ifdef RGBLIGHT_ENABLE
+#    define WS2812_LED_TOTAL 0
+#else
+#    define WS2812_LED_TOTAL RGBLED_NUM
+#endif
+
+#define DRIVER_LED_TOTAL (ISSI_LED_TOTAL + WS2812_LED_TOTAL)
+
+
+
+
