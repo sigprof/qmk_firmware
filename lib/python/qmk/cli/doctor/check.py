@@ -28,6 +28,15 @@ ESSENTIAL_BINARIES = {
     },
 }
 
+OPTIONAL_BINARIES = {
+    'riscv32-unknown-elf-gcc': {
+        'version_arg': '-dumpversion'
+    },
+    'riscv64-unknown-elf-gcc': {
+        'version_arg': '-dumpversion'
+    },
+}
+
 
 def _parse_gcc_version(version):
     m = re.match(r"(\d+)(?:\.(\d+))?(?:\.(\d+))?", version)
@@ -47,6 +56,23 @@ def _check_arm_gcc_version():
         cli.log.info('Found arm-none-eabi-gcc version %s', version_number)
 
     return CheckStatus.OK  # Right now all known arm versions are ok
+
+
+def _check_riscv_gcc_version():
+    """Returns True if the riscv32-unknown-elf-gcc or riscv64-unknown-elf-gcc version is not known to cause problems.
+    """
+    rc = CheckStatus.WARNING
+    if 'output' in OPTIONAL_BINARIES['riscv32-unknown-elf-gcc']:
+        version_number = OPTIONAL_BINARIES['riscv32-unknown-elf-gcc']['output'].strip()
+        cli.log.info('Found riscv32-unknown-elf-gcc version %s', version_number)
+        rc = CheckStatus.OK
+
+    if 'output' in OPTIONAL_BINARIES['riscv64-unknown-elf-gcc']:
+        version_number = OPTIONAL_BINARIES['riscv64-unknown-elf-gcc']['output'].strip()
+        cli.log.info('Found riscv64-unknown-elf-gcc version %s', version_number)
+        rc = CheckStatus.OK
+
+    return rc
 
 
 def _check_avr_gcc_version():
@@ -95,22 +121,25 @@ def _check_dfu_programmer_version():
 
 
 def check_binaries():
-    """Iterates through ESSENTIAL_BINARIES and tests them.
+    """Iterates through ESSENTIAL_BINARIES as well as OPTIONAL_BINARIES and tests them.
     """
     ok = True
 
     for binary in sorted(ESSENTIAL_BINARIES):
-        if not is_executable(binary):
+        if not is_executable(binary, ESSENTIAL_BINARIES):
             ok = False
+
+    for binary in sorted(OPTIONAL_BINARIES):
+        is_executable(binary, OPTIONAL_BINARIES, True)
 
     return ok
 
 
 def check_binary_versions():
-    """Check the versions of ESSENTIAL_BINARIES
+    """Check the versions of ESSENTIAL_BINARIES and OPTIONAL_BINARIES
     """
     versions = []
-    for check in (_check_arm_gcc_version, _check_avr_gcc_version, _check_avrdude_version, _check_dfu_util_version, _check_dfu_programmer_version):
+    for check in (_check_arm_gcc_version, _check_avr_gcc_version, _check_avrdude_version, _check_dfu_util_version, _check_dfu_programmer_version, _check_riscv_gcc_version):
         versions.append(check())
     return versions
 
@@ -129,20 +158,23 @@ def check_submodules():
     return CheckStatus.OK
 
 
-def is_executable(command):
+def is_executable(command, dict, warn=False):
     """Returns True if command exists and can be executed.
     """
     # Make sure the command is in the path.
     res = shutil.which(command)
     if res is None:
-        cli.log.error("{fg_red}Can't find %s in your path.", command)
+        if warn:
+            cli.log.warning("{fg_yellow}Can't find %s in your path.", command)
+        else:
+            cli.log.error("{fg_red}Can't find %s in your path.", command)
         return False
 
     # Make sure the command can be executed
-    version_arg = ESSENTIAL_BINARIES[command].get('version_arg', '--version')
+    version_arg = dict[command].get('version_arg', '--version')
     check = cli.run([command, version_arg], combined_output=True, stdin=DEVNULL, timeout=5)
 
-    ESSENTIAL_BINARIES[command]['output'] = check.stdout
+    dict[command]['output'] = check.stdout
 
     if check.returncode in [0, 1]:  # Older versions of dfu-programmer exit 1
         cli.log.debug('Found {fg_cyan}%s', command)
