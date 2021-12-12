@@ -12,13 +12,13 @@ enum layer_names {
 #define RGB_AND RGB_RMOD
 
 // Custom keycodes with names that fit in 7 characters.
+#define U_FCAPS LT(_FN, KC_CAPS)
 #define U_FAPP  LT(_FN, KC_APP)
+#define U_NBSLS LT(_NUMPAD, KC_BSLS)
 #define U_MOADJ MO(_ADJUST)
 #define U_TGNUM TG(_NUMPAD)
-#define U_FCAPS LT(_FN, KC_CAPS)
-#define U_NBSLS LT(_NUMPAD, KC_BSLS)
-#define U_OSRCT OSM(MOD_RCTL)
 #define U_OSRGU OSM(MOD_RGUI)
+#define U_OSRCT OSM(MOD_RCTL)
 #define U_CPGUP RCTL(KC_PGUP)
 #define U_CPGDN RCTL(KC_PGDN)
 
