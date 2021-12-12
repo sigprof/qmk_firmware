@@ -29,3 +29,11 @@
 // is required, because using the HOLD_ON_OTHER_KEY_PRESS behavior globally is
 // not appropriate for some cases like OSL() or OSM().
 #define HOLD_ON_OTHER_KEY_PRESS_PER_KEY
+
+// Increase the backlight PWM frequency by decreasing the resolution.  The
+// default value (0xFFFFU) together with the 16 MHz clock results in ≈244 Hz
+// PWM frequency, which is very noticeable.  Another limitation of the ID80 PCB
+// (that might be specific to some particular batch) is that it emits a slight
+// whining sound when the PWM output frequency is about 8000 Hz; however, using
+// 4000 Hz looks good enough, but does not cause any annoying sounds.
+#define BACKLIGHT_CUSTOM_RESOLUTION (F_CPU / 4000)
