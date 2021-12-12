@@ -11,3 +11,10 @@ RGBLIGHT_ENABLE = yes
 
 # Enable NKRO (also disabled in the default configuration).
 NKRO_ENABLE = yes
+
+# Enable dynamic macros.
+DYNAMIC_MACRO_ENABLE = yes
+
+# Enable link-time optimization (required to make the firmware actually fit
+# into flash with all enabled features).
+LTO_ENABLE = yes
