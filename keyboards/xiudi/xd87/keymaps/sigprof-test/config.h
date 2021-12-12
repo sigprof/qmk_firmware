@@ -32,6 +32,15 @@
 //
 #define PERMISSIVE_HOLD_PER_KEY
 
+// Increase the backlight PWM frequency by decreasing the resolution.  The
+// default value (0xFFFFU) together with the 16 MHz clock results in ≈244 Hz
+// PWM frequency, which is very noticeable.  However, another concern with XD87
+// is that PWM for the backlight is implemented by toggling the pin in software
+// (due to bad hardware design not using a PWM-capable pin for that purpose),
+// therefore the PWM frequency should not be set too high.  Use 2000 Hz as a
+// compromise.
+#define BACKLIGHT_CUSTOM_RESOLUTION (F_CPU / 2000)
+
 // Increase the number of RGB LEDs to test the behavior with a really long
 // chain of WS2812 LEDs.  For 105 LEDs (imagine a fullsize ISO keyboard with
 // per-key RGB) sending of the bitstream would take 3.15 ms.
