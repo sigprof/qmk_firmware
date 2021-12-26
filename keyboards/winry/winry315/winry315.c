@@ -65,10 +65,13 @@ bool encoder_update_kb(uint8_t index, bool clockwise) {
 //  25 - underglow, right top
 //  26 - underglow, right middle
 
-#    define WIDTH_MM 94
-#    define HEIGHT_MM 90
-#    define WIDTH_UNITS (112 * 2)
-#    define HEIGHT_UNITS (32 * 2)
+#    define WIDTH_MM 94            // PCB width in mm (approximate, should be an even number)
+#    define HEIGHT_MM 90           // PCB height in mm (approximate, should be an even number)
+#    define WIDTH_UNITS (112 * 2)  // PCB width in internal RGB Matrix units
+#    define HEIGHT_UNITS (32 * 2)  // PCB height in internal RGB Matrix units
+
+// Convert the LED physical coordinates from millimeters with the origin at the
+// PCB center to the form expected by the RGB Matrix code.
 #    define LED(x_mm, y_mm) \
         { (WIDTH_MM / 2 + x_mm) * WIDTH_UNITS / WIDTH_MM, (HEIGHT_MM / 2 - y_mm) * HEIGHT_UNITS / HEIGHT_MM }
 
@@ -107,11 +110,33 @@ led_config_t g_led_config = {
         LED( 37,  -9)
     },
     {
-        1, 1, 1, 1, 1, 1, // use modifier color for encoders
-        4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, // regular keys
-        2, 2, 2, 2, 2, 2 // underglow
+        1, 1, 1, 1, 1, 1,                               // encoders (colored as modifiers)
+        4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,    // regular keys
+        2, 2, 2, 2, 2, 2                                // underglow
     }
 };
 // clang-format on
+
+// Encoders have two associated LEDs on this board; supporting more than one
+// LED per key requires defining rgb_matrix_map_row_column_to_led_kb() to
+// report any extra LEDs.
+uint8_t rgb_matrix_map_row_column_to_led_kb(uint8_t row, uint8_t column, uint8_t *led_i) {
+    if (row == 0) {
+        switch (column) {
+            case 15:  // center encoder
+                led_i[0] = 3;
+                return 1;
+
+            case 16:  // right encoder
+                led_i[0] = 1;
+                return 1;
+
+            case 17:  // left encoder
+                led_i[0] = 5;
+                return 1;
+        }
+    }
+    return 0;
+}
 
 #endif

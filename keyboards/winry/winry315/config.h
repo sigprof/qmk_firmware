@@ -5,7 +5,7 @@
 
 #include "config_common.h"
 
-/* USB Device descriptor parameter */
+/* USB Device descriptor parameters */
 #define VENDOR_ID 0xF1F1
 #define PRODUCT_ID 0x0315
 #define DEVICE_VER 0x0001
@@ -38,6 +38,7 @@
     { F0, B1, B7 }
 #define ENCODER_RESOLUTION 4
 
+/* Encoder mappings (used for VIA). */
 #define ENCODERS 3
 #define ENCODERS_CW_KEY             \
     {                               \
@@ -48,10 +49,19 @@
         {23, 0}, {19, 0}, { 21, 0 } \
     }
 
+/*
+ * RGB LED parameters.
+ * This PCB uses a single chain of WS2812-compatible addressable RGB LEDs for
+ * per-key backlight and underglow.
+ */
 #define RGB_DI_PIN F7
 #define RGBLED_NUM 27
 #define RGBLIGHT_LIMIT_VAL 150
 
+/*
+ * RGB Lighting configuration.  This mode is used by the vendor firmware, and
+ * can be chosen if the full RGB Matrix support is not desired for some reason.
+ */
 #ifdef RGBLIGHT_ENABLE
 #    define RGBLIGHT_HUE_STEP 8
 #    define RGBLIGHT_SAT_STEP 8
@@ -68,10 +78,22 @@
 #    define RGBLIGHT_EFFECT_ALTERNATING
 #endif
 
+/*
+ * RGB Matrix configuration.
+ */
 #ifdef RGB_MATRIX_ENABLE
 #    define DRIVER_LED_TOTAL RGBLED_NUM
 #    define RGB_MATRIX_MAXIMUM_BRIGHTNESS RGBLIGHT_LIMIT_VAL
+
+// This option is required for the TYPING_HEATMAP and DIGITAL_RAIN effects,
+// both of which are disabled below, so the common support for those effects is
+// disabled too.
+#    undef RGB_MATRIX_FRAMEBUFFER_EFFECTS
+
+// This option is required for reactive effects; disabling this option will
+// implicitly disable all of them.
 #    define RGB_MATRIX_KEYPRESSES
+
 #    define ENABLE_RGB_MATRIX_ALPHAS_MODS
 #    define ENABLE_RGB_MATRIX_GRADIENT_UP_DOWN
 #    define ENABLE_RGB_MATRIX_GRADIENT_LEFT_RIGHT
@@ -94,17 +116,21 @@
 #    define ENABLE_RGB_MATRIX_RAINBOW_BEACON
 #    define ENABLE_RGB_MATRIX_RAINBOW_PINWHEELS
 #    define ENABLE_RGB_MATRIX_RAINDROPS
-//#    define ENABLE_RGB_MATRIX_JELLYBEAN_RAINDROPS
+#    define ENABLE_RGB_MATRIX_JELLYBEAN_RAINDROPS
 #    define ENABLE_RGB_MATRIX_HUE_BREATHING
 #    define ENABLE_RGB_MATRIX_HUE_PENDULUM
 #    define ENABLE_RGB_MATRIX_HUE_WAVE
 #    define ENABLE_RGB_MATRIX_PIXEL_RAIN
-#    define ENABLE_RGB_MATRIX_PIXEL_FLOW
 #    define ENABLE_RGB_MATRIX_PIXEL_FRACTAL
-// enabled only if RGB_MATRIX_FRAMEBUFFER_EFFECTS is defined
-#    define ENABLE_RGB_MATRIX_TYPING_HEATMAP
-#    define ENABLE_RGB_MATRIX_DIGITAL_RAIN
-// enabled only of RGB_MATRIX_KEYPRESSES or RGB_MATRIX_KEYRELEASES is defined
+
+// Framebuffer effects; can be enabled only if RGB_MATRIX_FRAMEBUFFER_EFFECTS
+// is defined.  Both of these effects currently don't work properly when the
+// key matrix does not match the physical layout, so they are disabled.
+#    undef ENABLE_RGB_MATRIX_TYPING_HEATMAP
+#    undef ENABLE_RGB_MATRIX_DIGITAL_RAIN
+
+// Reactive effects; can be enabled only if at least one of
+// RGB_MATRIX_KEYPRESSES or RGB_MATRIX_KEYRELEASES is defined.
 #    define ENABLE_RGB_MATRIX_SOLID_REACTIVE_SIMPLE
 #    define ENABLE_RGB_MATRIX_SOLID_REACTIVE
 #    define ENABLE_RGB_MATRIX_SOLID_REACTIVE_WIDE
@@ -117,12 +143,13 @@
 #    define ENABLE_RGB_MATRIX_MULTISPLASH
 #    define ENABLE_RGB_MATRIX_SOLID_SPLASH
 #    define ENABLE_RGB_MATRIX_SOLID_MULTISPLASH
+
 #endif
 
-/* Debounce reduces chatter (unintended double-presses) - set 0 if debouncing is not needed */
+/* Debounce reduces chatter (unintended double-presses) - set 0 if debouncing is not needed. */
 #define DEBOUNCE 5
 
-/* disable these deprecated features by default */
+/* Disable these deprecated features by default. */
 #define NO_ACTION_MACRO
 #define NO_ACTION_FUNCTION
 
