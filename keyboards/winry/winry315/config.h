@@ -1,4 +1,4 @@
-// Copyright 2021 Sergey Vlasov (@sigprof)
+// Copyright 2022 Sergey Vlasov (@sigprof)
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once
@@ -121,7 +121,10 @@
 #    define ENABLE_RGB_MATRIX_HUE_PENDULUM
 #    define ENABLE_RGB_MATRIX_HUE_WAVE
 #    define ENABLE_RGB_MATRIX_PIXEL_RAIN
-#    define ENABLE_RGB_MATRIX_PIXEL_FRACTAL
+// The PIXEL_FRACTAL effect does not work properly when the matrix layout is
+// different from the physical layout; it also has problems when underglow
+// LEDs are present, or when multiple LEDs are associated with the same key.
+#    undef ENABLE_RGB_MATRIX_PIXEL_FRACTAL
 
 // Framebuffer effects; can be enabled only if RGB_MATRIX_FRAMEBUFFER_EFFECTS
 // is defined.  Both of these effects currently don't work properly when the

@@ -1,4 +1,4 @@
-// Copyright 2021 Sergey Vlasov (@sigprof)
+// Copyright 2022 Sergey Vlasov (@sigprof)
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once

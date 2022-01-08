@@ -1,6 +1,6 @@
 /* Copyright 2020 Neil Brian Ramirez
  * Copyright 2021 drashna jael're (@drashna)
- * Copyright 2021 Sergey Vlasov (@sigprof)
+ * Copyright 2022 Sergey Vlasov (@sigprof)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
