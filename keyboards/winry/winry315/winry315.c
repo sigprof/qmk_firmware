@@ -3,6 +3,10 @@
 
 #include "winry315.h"
 
+#if !defined(WINRY315_DEFAULT_ORIENTATION)
+#    define WINRY315_DEFAULT_ORIENTATION WINRY315_ORIENTATION_TOP
+#endif
+
 #if defined(VIA_ENABLE)
 #    include "via.h"
 #endif
@@ -69,18 +73,22 @@ bool encoder_update_kb(uint8_t index, bool clockwise) {
 //  25 - underglow, right top
 //  26 - underglow, right middle
 
-#    define WIDTH_MM 94            // PCB width in mm (approximate, should be an even number)
-#    define HEIGHT_MM 90           // PCB height in mm (approximate, should be an even number)
-#    define WIDTH_UNITS (112 * 2)  // PCB width in internal RGB Matrix units
-#    define HEIGHT_UNITS (32 * 2)  // PCB height in internal RGB Matrix units
+#    define X_MM_MIN (-42)
+#    define X_MM_MAX 42
+#    define Y_MM_MIN (-40)  // actually -35, but adjusted to get height = width
+#    define Y_MM_MAX 44     // actually 40, but adjusted to get height = width
+#    define WIDTH_MM (X_MM_MAX - X_MM_MIN)
+#    define HEIGHT_MM (Y_MM_MAX - Y_MM_MIN)
+#    define WIDTH_UNITS (112 * 2)   // needs to match RGB_MATRIX_CENTER
+#    define HEIGHT_UNITS (112 * 2)  // needs to match RGB_MATRIX_CENTER
 
 // Convert the LED physical coordinates from millimeters with the origin at the
 // PCB center to the form expected by the RGB Matrix code.
 #    define LED(x_mm, y_mm) \
-        { (WIDTH_MM / 2 + x_mm) * WIDTH_UNITS / WIDTH_MM, (HEIGHT_MM / 2 - y_mm) * HEIGHT_UNITS / HEIGHT_MM }
+        { (x_mm - X_MM_MIN) * WIDTH_UNITS / WIDTH_MM, (Y_MM_MAX - y_mm) * HEIGHT_UNITS / HEIGHT_MM }
 
 // clang-format off
-led_config_t g_led_config = {
+static const led_config_t PROGMEM initial_led_config = {
     {
         { 6, 11, 12, 17, 18, 7, 10, 13, 16, 19, 8, 9, 14, 15, 20, 2, 0, 4, NO_LED, NO_LED, NO_LED, NO_LED, NO_LED, NO_LED }
     },
@@ -120,6 +128,18 @@ led_config_t g_led_config = {
     }
 };
 // clang-format on
+
+led_config_t g_led_config;
+
+void keyboard_pre_init_kb(void) {
+    // To be safe against any possible changes to rgb_matrix_init(),
+    // g_led_config should be initialized before rgb_matrix_init() is called;
+    // matrix_init_kb() would be too late, so keyboard_pre_init_kb() is used.
+    memcpy_P(&g_led_config, &initial_led_config, sizeof(g_led_config));
+    winry315_set_orientation(WINRY315_DEFAULT_ORIENTATION);
+
+    keyboard_pre_init_user();
+}
 
 // Encoders have two associated LEDs on this board; supporting more than one
 // LED per key requires defining rgb_matrix_map_row_column_to_led_kb() to
@@ -198,3 +218,39 @@ void raw_hid_receive_kb(uint8_t *data, uint8_t length) {
 #    endif
 
 #endif
+
+void winry315_set_orientation(uint8_t orientation) {
+#if defined(RGB_MATRIX_ENABLE)
+    for (uint8_t i = 0; i < DRIVER_LED_TOTAL; ++i) {
+        led_point_t *      dst_point = &g_led_config.point[i];
+        const led_point_t *src_point = &initial_led_config.point[i];
+        uint8_t            x         = pgm_read_byte(&src_point->x);
+        uint8_t            y         = pgm_read_byte(&src_point->y);
+
+        switch (orientation) {
+            case WINRY315_ORIENTATION_TOP:
+            default:
+                dst_point->x = x;
+                dst_point->y = y;
+                break;
+
+            case WINRY315_ORIENTATION_LEFT:
+                dst_point->x = y;
+                dst_point->y = WIDTH_UNITS - x;
+                break;
+
+            case WINRY315_ORIENTATION_RIGHT:
+                dst_point->x = HEIGHT_UNITS - y;
+                dst_point->y = x;
+                break;
+
+            case WINRY315_ORIENTATION_BOTTOM:
+                dst_point->x = WIDTH_UNITS - x;
+                dst_point->y = HEIGHT_UNITS - y;
+                break;
+        }
+    }
+#else
+    (void)orientation;
+#endif
+}

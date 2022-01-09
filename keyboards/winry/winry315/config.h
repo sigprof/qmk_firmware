@@ -85,6 +85,11 @@
 #    define DRIVER_LED_TOTAL RGBLED_NUM
 #    define RGB_MATRIX_MAXIMUM_BRIGHTNESS RGBLIGHT_LIMIT_VAL
 
+#    define RGB_MATRIX_CENTER \
+        { 112, 112 }
+
+#    define RGB_DISABLE_WHEN_USB_SUSPENDED
+
 // This option is required for the TYPING_HEATMAP and DIGITAL_RAIN effects,
 // both of which are disabled below, so the common support for those effects is
 // disabled too.

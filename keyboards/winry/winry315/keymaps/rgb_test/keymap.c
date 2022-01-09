@@ -15,6 +15,8 @@
  */
 #include QMK_KEYBOARD_H
 
+#include <stdio.h>
+
 enum custom_keycodes {
     RT_TOGG = SAFE_RANGE,
     RT_RSET,
