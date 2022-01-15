@@ -41,9 +41,9 @@ bool encoder_update_kb(uint8_t index, bool clockwise) {
     }
     return true;
 }
-#endif
+#endif // !defined(VIA_ENABLE) && defined(ENCODER_ENABLE)
 
-#ifdef RGB_MATRIX_ENABLE
+#if defined(RGB_MATRIX_ENABLE)
 
 // LED mapping (assuming the default "top" orientation):
 //   0 - right encoder, top right
@@ -216,11 +216,12 @@ void raw_hid_receive_kb(uint8_t *data, uint8_t length) {
     }
 }
 
-#    endif
+#    endif // defined(VIA_ENABLE) && defined(VIA_CUSTOM_LIGHTING_ENABLE)
 
-#endif
+#endif // defined(RGB_MATRIX_ENABLE)
 
 void winry315_set_orientation(uint8_t orientation) {
+    (void)orientation;
 #if defined(RGB_MATRIX_ENABLE)
     for (uint8_t i = 0; i < DRIVER_LED_TOTAL; ++i) {
         led_point_t *      dst_point = &g_led_config.point[i];
@@ -251,7 +252,5 @@ void winry315_set_orientation(uint8_t orientation) {
                 break;
         }
     }
-#else
-    (void)orientation;
-#endif
+#endif // defined(RGB_MATRIX_ENABLE)
 }

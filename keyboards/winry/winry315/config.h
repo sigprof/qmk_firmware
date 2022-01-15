@@ -5,40 +5,37 @@
 
 #include "config_common.h"
 
-/* USB Device descriptor parameters */
+// USB Device descriptor parameters.
 #define VENDOR_ID 0xF1F1
 #define PRODUCT_ID 0x0315
 #define DEVICE_VER 0x0001
 #define MANUFACTURER Winry
 #define PRODUCT Winry315
 
-/* Key matrix size */
+// Key matrix size.
 #define MATRIX_ROWS 1
 #define MATRIX_COLS 24
 
-/*
- * Key pins (including encoder press switches).
- * The NO_PIN entries are reserved for encoder rotation mappings.
- */
+// Key pins (including encoder press switches).
+// The NO_PIN entries are reserved for encoder rotation mappings.
 #define DIRECT_PINS                                                                                                                \
     {                                                                                                                              \
         { F4, C7, D4, D5, D1, F5, C6, D6, D3, D2, F6, B6, D7, B4, B5, B2, D0, E6, NO_PIN, NO_PIN, NO_PIN, NO_PIN, NO_PIN, NO_PIN } \
     }
 
-/*
- * Encoder pins.
- * Encoder numbering:
- *   0 - left
- *   1 - center (with a longer shaft and a larger knob)
- *   2 - right
- */
+// Encoder pins.
+// Encoder numbering (assuming the default board orientation with encoders on
+// the top side):
+//   0 - left
+//   1 - center (with a longer shaft and a larger knob)
+//   2 - right
 #define ENCODERS_PAD_A \
     { F1, B0, B3 }
 #define ENCODERS_PAD_B \
     { F0, B1, B7 }
 #define ENCODER_RESOLUTION 4
 
-/* Encoder mappings (used for VIA). */
+// Encoder mappings (used for VIA).
 #define ENCODERS 3
 #define ENCODERS_CW_KEY             \
     {                               \
@@ -49,19 +46,15 @@
         {23, 0}, {19, 0}, { 21, 0 } \
     }
 
-/*
- * RGB LED parameters.
- * This PCB uses a single chain of WS2812-compatible addressable RGB LEDs for
- * per-key backlight and underglow.
- */
+// RGB LED parameters.
+// This PCB uses a single chain of WS2812-compatible addressable RGB LEDs for
+// per-key backlight and underglow.
 #define RGB_DI_PIN F7
 #define RGBLED_NUM 27
 #define RGBLIGHT_LIMIT_VAL 150
 
-/*
- * RGB Lighting configuration.  This mode is used by the vendor firmware, and
- * can be chosen if the full RGB Matrix support is not desired for some reason.
- */
+// RGB Lighting configuration.  This mode is used by the vendor firmware, and
+// can be chosen if the full RGB Matrix support is not desired for some reason.
 #ifdef RGBLIGHT_ENABLE
 #    define RGBLIGHT_HUE_STEP 8
 #    define RGBLIGHT_SAT_STEP 8
@@ -78,9 +71,7 @@
 #    define RGBLIGHT_EFFECT_ALTERNATING
 #endif
 
-/*
- * RGB Matrix configuration.
- */
+// RGB Matrix configuration.
 #ifdef RGB_MATRIX_ENABLE
 #    define DRIVER_LED_TOTAL RGBLED_NUM
 #    define RGB_MATRIX_MAXIMUM_BRIGHTNESS RGBLIGHT_LIMIT_VAL
@@ -154,11 +145,12 @@
 
 #endif
 
-/* Debounce reduces chatter (unintended double-presses) - set 0 if debouncing is not needed. */
+// Debounce reduces chatter (unintended double-presses) - set 0 if debouncing is not needed.
 #define DEBOUNCE 5
 
-/* Disable these deprecated features by default. */
+// Disable these deprecated features by default.
 #define NO_ACTION_MACRO
 #define NO_ACTION_FUNCTION
 
+// Use 1000 Hz polling (the fastest possible for a Full Speed device).
 #define USB_POLLING_INTERVAL_MS 1
