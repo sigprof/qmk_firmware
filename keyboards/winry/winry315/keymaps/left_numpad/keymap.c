@@ -14,20 +14,22 @@ enum layer_names {
 
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    // Base
-    [_BASE] = LAYOUT_top(
-            KC_HOME,      KC_MUTE,     KC_MPLY,
-        KC_1,    KC_2,    KC_3,    KC_4,    KC_5,
-        KC_6,    KC_7,    KC_8,    KC_9,    KC_0,
-        U_LTESC, KC_TAB,  KC_SPC,  KC_BSPC, KC_ENT
+    /* Base */
+    [_BASE] = LAYOUT_left(
+        KC_MPLY,    U_LTESC, KC_BSPC, KC_PENT,
+                    KC_P7,   KC_P8,   KC_P9,
+        KC_MUTE,    KC_P4,   KC_P5,   KC_P6,
+                    KC_P1,   KC_P2,   KC_P3,
+        KC_HOME,    KC_P0,   KC_P0,   KC_PDOT
     ),
 
-    // RGB configuration
-    [_RGB] = LAYOUT_top(
-            RGB_M_P,      RGB_M_B,     RGB_M_R,
-        RGB_MOD, RGB_HUI, RGB_SAI, RGB_VAI, RGB_SPI,
-        RGB_RMOD,RGB_HUD, RGB_SAD, RGB_VAD, RGB_SPD,
-        KC_TRNS, RGB_TOG, RGB_M_P, RGB_M_B, RGB_M_R
+    /* RGB configuration */
+    [_RGB] = LAYOUT_left(
+        RGB_M_R,    KC_TRNS, RGB_SPD, RGB_SPI,
+                    RGB_TOG, RGB_HUD, RGB_HUI,
+        RGB_M_B,    RGB_M_P, RGB_SAD, RGB_SAI,
+                    KC_NO,   RGB_VAD, RGB_VAI,
+        RGB_M_P,    KC_NLCK, RGB_RMOD,RGB_MOD
     ),
 };
 // clang-format on
@@ -37,12 +39,12 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
 
     switch (index) {
         case 0:
-            // Left encoder
+            // Bottom encoder (left in the default orientation)
             if (layer == _RGB) {
                 if (clockwise) {
-                    rgblight_increase_hue();
+                    rgblight_increase_val();
                 } else {
-                    rgblight_decrease_hue();
+                    rgblight_decrease_val();
                 }
             } else {
                 tap_code(clockwise ? KC_PGDN : KC_PGUP);
@@ -63,12 +65,12 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
             break;
 
         case 2:
-            // Right encoder
+            // Top encoder (right in the default orientation)
             if (layer == _RGB) {
                 if (clockwise) {
-                    rgblight_increase_val();
+                    rgblight_increase_hue();
                 } else {
-                    rgblight_decrease_val();
+                    rgblight_decrease_hue();
                 }
             } else {
                 tap_code_delay(clockwise ? KC_MNXT : KC_MPRV, 10);

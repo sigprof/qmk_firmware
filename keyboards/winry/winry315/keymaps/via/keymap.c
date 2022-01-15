@@ -47,13 +47,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // accordingly (VIA does not have a callback for layout option changes).
 void housekeeping_task_user(void) {
     static uint16_t layout_check_timer;
-    static uint32_t last_options;
-    if (timer_elapsed(layout_check_timer) > 2000) {
-        layout_check_timer = timer_read();
-        uint32_t options   = via_get_layout_options();
-        if (options != last_options) {
-            last_options = options;
-            winry315_set_orientation(options & 0x03);
+    static uint8_t  last_orientation = WINRY315_ORIENTATION_TOP;
+    if (timer_elapsed(layout_check_timer) > 1000) {
+        layout_check_timer  = timer_read();
+        uint8_t orientation = via_get_layout_options() & 0x03;
+        if (orientation != last_orientation) {
+            last_orientation = orientation;
+            winry315_set_orientation(orientation);
         }
     }
 }

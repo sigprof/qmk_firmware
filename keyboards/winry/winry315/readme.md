@@ -27,5 +27,19 @@ See the [build environment setup](https://docs.qmk.fm/#/getting_started_build_to
 Enter the bootloader in 3 ways:
 
 * **Bootmagic reset**: Hold down the top left key (not the encoder) and plug in the keyboard.  This apparently also works with the vendor VIA firmware.
+  * Note that the bootmagic key does not change with the board orientation configured using `WINRY315_DEFAULT_ORIENTATION` — the “top left” key position in the default orientation (encoders on the top side) is always used.
 * **Physical reset button**: Briefly press the button on the back of the PCB (the acrylic bottom cover should have a hole to access that button).
 * **Keycode in layout**: Press the key mapped to `RESET` if it is available (the default keymap does not have that keycode assigned to any key, but you can use that keycode in your custom keymap if you want to have easier access to the bootloader).
+
+## Orientation
+
+Although the normal orientation of this macropad is with the encoders on the “top” side (away from the user), you may prefer using it in a sideways orientation (with the encoders on the left or right side).  There are extra layout macros (`LAYOUT_left`, `LAYOUT_right` and even `LAYOUT_bottom` for completeness) which you can use in the keymap; however, just using one of those macros won't change the behavior of RGB Matrix effects.  If you want to change the orientation of various RGB Matrix effects too, you can specify the desired orientation in the `config.h` file for your custom keymap by using one of the following defines:
+
+    #define WINRY315_DEFAULT_ORIENTATION WINRY315_ORIENTATION_TOP
+    #define WINRY315_DEFAULT_ORIENTATION WINRY315_ORIENTATION_LEFT
+    #define WINRY315_DEFAULT_ORIENTATION WINRY315_ORIENTATION_RIGHT
+    #define WINRY315_DEFAULT_ORIENTATION WINRY315_ORIENTATION_BOTTOM
+
+The VIA firmware changes the orientation for RGB Matrix effects automatically when the “Encoder Side” layout option is changed.
+
+Note that stems of MX switches are not symmetrical with respect to 90° rotation, so you may have some difficulties when putting the keycaps on switches if you choose one of sideways orientations.
