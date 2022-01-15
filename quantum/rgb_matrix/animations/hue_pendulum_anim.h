@@ -7,7 +7,12 @@ RGB_MATRIX_EFFECT(HUE_PENDULUM)
 // Hue Pendulum - color changes in a wave to the right before reversing direction
 static HSV HUE_PENDULUM_math(HSV hsv, uint8_t i, uint8_t time) {
     uint8_t huedelta = 12;
-    hsv.h            = hsv.h + scale8(abs8(sin8(time) + (g_led_config.point[i].x) - 128) * 2, huedelta);
+    int16_t v1 = sin8(time) + (g_led_config.point[i].x) - k_rgb_matrix_center.x;
+    if (v1 < -128)
+        v1 = -128;
+    else if (v1 > 127)
+        v1 = 127;
+    hsv.h            = hsv.h + scale8(abs8(v1) * 2, huedelta);
     return hsv;
 }
 
