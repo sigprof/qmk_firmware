@@ -86,7 +86,7 @@ bool encoder_update_kb(uint8_t index, bool clockwise) {
 // Convert the LED physical coordinates from millimeters with the origin at the
 // PCB center to the form expected by the RGB Matrix code.
 #    define LED(x_mm, y_mm) \
-        { (x_mm - X_MM_MIN) * WIDTH_UNITS / WIDTH_MM, (Y_MM_MAX - y_mm) * HEIGHT_UNITS / HEIGHT_MM }
+        { ((x_mm - X_MM_MIN) * WIDTH_UNITS + WIDTH_MM / 2) / WIDTH_MM, ((Y_MM_MAX - y_mm) * HEIGHT_UNITS + HEIGHT_MM / 2) / HEIGHT_MM }
 
 // clang-format off
 static const led_config_t PROGMEM initial_led_config = {
