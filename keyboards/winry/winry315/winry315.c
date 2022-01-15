@@ -17,19 +17,22 @@ bool encoder_update_kb(uint8_t index, bool clockwise) {
     if (!encoder_update_user(index, clockwise)) {
         return false;
     }
-    if (index == 0) { /* Left encoder  */
+    if (index == 0) {
+        // Left encoder (assuming the default "top" orientation)
         if (clockwise) {
             tap_code(KC_PGDN);
         } else {
             tap_code(KC_PGUP);
         }
-    } else if (index == 1) { /* Center encoder */
+    } else if (index == 1) {
+        // Center encoder
         if (clockwise) {
             tap_code_delay(KC_VOLU, MEDIA_KEY_DELAY);
         } else {
             tap_code_delay(KC_VOLD, MEDIA_KEY_DELAY);
         }
-    } else if (index == 2) { /* Right encoder */
+    } else if (index == 2) {
+        // Right encoder
         if (clockwise) {
             tap_code_delay(KC_MNXT, MEDIA_KEY_DELAY);
         } else {
@@ -42,7 +45,7 @@ bool encoder_update_kb(uint8_t index, bool clockwise) {
 
 #ifdef RGB_MATRIX_ENABLE
 
-// LED mapping:
+// LED mapping (assuming the default "top" orientation):
 //   0 - right encoder, top right
 //   1 - right encoder, top left
 //   2 - center encoder, top right
