@@ -79,8 +79,8 @@ bool encoder_update_kb(uint8_t index, bool clockwise) {
 #    define Y_MM_MAX 44     // actually 40, but adjusted to get height = width
 #    define WIDTH_MM (X_MM_MAX - X_MM_MIN)
 #    define HEIGHT_MM (Y_MM_MAX - Y_MM_MIN)
-#    define WIDTH_UNITS (112 * 2)   // needs to match RGB_MATRIX_CENTER
-#    define HEIGHT_UNITS (112 * 2)  // needs to match RGB_MATRIX_CENTER
+#    define WIDTH_UNITS (35 * 2)   // needs to match RGB_MATRIX_CENTER
+#    define HEIGHT_UNITS (35 * 2)  // needs to match RGB_MATRIX_CENTER
 
 // Convert the LED physical coordinates from millimeters with the origin at the
 // PCB center to the form expected by the RGB Matrix code.

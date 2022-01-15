@@ -86,7 +86,7 @@
 #    define RGB_MATRIX_MAXIMUM_BRIGHTNESS RGBLIGHT_LIMIT_VAL
 
 #    define RGB_MATRIX_CENTER \
-        { 112, 112 }
+        { 35, 35 }
 
 #    define RGB_DISABLE_WHEN_USB_SUSPENDED
 
