@@ -3,12 +3,10 @@
 
 #include "winry315.h"
 
+#include "via.h"
+
 #if !defined(WINRY315_DEFAULT_ORIENTATION)
 #    define WINRY315_DEFAULT_ORIENTATION WINRY315_ORIENTATION_TOP
-#endif
-
-#if defined(VIA_ENABLE)
-#    include "via.h"
 #endif
 
 #if !defined(VIA_ENABLE) && defined(ENCODER_ENABLE)
