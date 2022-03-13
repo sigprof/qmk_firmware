@@ -13,11 +13,6 @@
 // Set the USB polling rate to 1000 Hz to reduce the latency to the minimum.
 #define USB_POLLING_INTERVAL_MS 1
 
-// Allow for some not so good switches (should not affect the latency too much
-// with `DEBOUNCE_TYPE = sym_eager_pk`).
-#undef DEBOUNCE
-#define DEBOUNCE 25
-
 // Make the MT() behavior identical to LT() and other dual-use keys (this does
 // not really change the behavior when HOLD_ON_OTHER_KEY_PRESS is enabled, but
 // removes some extra code).
