@@ -384,4 +384,18 @@ qk_tap_dance_action_t tap_dance_actions[] = {
     [TD_RCTL] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, td_rctl_finished, td_rctl_reset),
 };
 
+void eeconfig_init_user(void) {
+    // RGB Lighting needs to be enabled for the lighting layers to work;
+    // however, the default color may be set to black.
+    rgblight_enable();
+    rgblight_mode(RGBLIGHT_MODE_STATIC_LIGHT);
+    rgblight_sethsv(HSV_BLACK);
+
+    // The backlight level needs to be set, but the backlight itself should be
+    // disabled (it would be enabled with the saved level by the group
+    // indicator code).
+    backlight_level(BACKLIGHT_LEVELS / 3);
+    backlight_disable();
+}
+
 /* vim:set sw=4 sta et: */
