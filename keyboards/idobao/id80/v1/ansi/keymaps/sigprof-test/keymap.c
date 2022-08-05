@@ -23,8 +23,15 @@ enum layer_names {
     _ADJUST,
 };
 
+enum tap_dance_ids {
+    TD_RALT,
+    TD_RCTL,
+};
+
 #define U_FCAPS LT(_FN, KC_CAPS)
 #define U_FAPP  LT(_FN, KC_APP)
+#define U_TRALT TD(TD_RALT)
+#define U_TRCTL TD(TD_RCTL)
 #define U_NBSLS LT(_NUMPAD, KC_BSLS)
 #define U_MOADJ OSL(_ADJUST) //MO(_ADJUST)
 #define U_TGNUM TG(_NUMPAD)
@@ -45,9 +52,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * Ins/Del pair does not seem to be good).
      *
      * There are only two modifier keys on the right side of the spacebar,
-     * which are used as AltGr and Fn (having the Fn key on the right side
-     * seems to be more useful than having Right Ctrl there).  The Fn key is
-     * also overloaded to work as App (Menu/Compose) key when tapped.
+     * which perform multiple functions through tap dances; here they are
+     * labeled as “TRAlt” and “TRCtl”, but the primary function of the “TRCtl”
+     * key is switching to the Fn layer.
      *
      * On the left side the Caps Lock key is also overloaded to work as Fn on
      * hold and Caps Lock on tap.
@@ -64,7 +71,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * ├──────┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴────┬───┘
      * │ Shift  │ Z │ X │ C │ V │ B │ N │ M │ , │ . │ / │ Shift│┌───┐
      * ├────┬───┴┬──┴─┬─┴───┴───┴───┴───┴───┴──┬┴───┴┬──┴──┬───┘│ ↑ │
-     * │Ctrl│GUI │Alt │                        │AltGr│ApFn │┌───┼───┼───┐
+     * │Ctrl│GUI │Alt │                        │TRAlt│TRCtl│┌───┼───┼───┐
      * └────┴────┴────┴────────────────────────┴─────┴─────┘│ ← │ ↓ │ → │
      *                                                      └───┴───┴───┘
      */
@@ -75,7 +82,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TAB,      KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, U_NBSLS,        KC_PGDN,
         U_FCAPS,       KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT, KC_ENT,
         KC_LSFT,            KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,          KC_UP,
-        KC_LCTL,   KC_LGUI,   KC_LALT,                       KC_SPC,                              KC_RALT,     U_FAPP,         KC_LEFT, KC_DOWN, KC_RGHT
+        KC_LCTL,   KC_LGUI,   KC_LALT,                       KC_SPC,                              U_TRALT,     U_TRCTL,        KC_LEFT, KC_DOWN, KC_RGHT
     ),
 
     /*
@@ -222,5 +229,142 @@ combo_t key_combos[] = {
 };
 
 uint16_t COMBO_LEN = sizeof(key_combos) / sizeof(key_combos[0]);
+
+// Tap dance for the “Right Alt” key:
+// - hold: KC_RALT
+// - tap: KC_RALT
+// - tap and hold: KC_RGUI
+// - double tap: KC_RGUI
+// - double tap and hold: KC_RGUI+KC_RALT
+// - triple tap: KC_RGUI+KC_RALT
+enum td_ralt_state {
+    TD_RALT_NOOP,
+    TD_RALT_RALT,
+    TD_RALT_RGUI,
+    TD_RALT_RGUI_RALT,
+};
+
+static enum td_ralt_state td_ralt_state;
+
+static void td_ralt_finished(qk_tap_dance_state_t *state, void *user_data) {
+    switch (state->count) {
+        case 1:
+            td_ralt_state = TD_RALT_RALT;
+            break;
+        case 2:
+            td_ralt_state = TD_RALT_RGUI;
+            break;
+        case 3:
+            td_ralt_state = TD_RALT_RGUI_RALT;
+            break;
+        default:
+            td_ralt_state = TD_RALT_NOOP;
+            break;
+    }
+
+    switch (td_ralt_state) {
+        case TD_RALT_NOOP:
+            break;
+        case TD_RALT_RALT:
+            register_code(KC_RALT);
+            break;
+        case TD_RALT_RGUI:
+            register_code(KC_RGUI);
+            break;
+        case TD_RALT_RGUI_RALT:
+            register_code(KC_RGUI);
+            register_code(KC_RALT);
+            break;
+    }
+}
+
+static void td_ralt_reset(qk_tap_dance_state_t *state, void *user_data) {
+    switch (td_ralt_state) {
+        case TD_RALT_NOOP:
+            break;
+        case TD_RALT_RALT:
+            unregister_code(KC_RALT);
+            break;
+        case TD_RALT_RGUI:
+            unregister_code(KC_RGUI);
+            break;
+        case TD_RALT_RGUI_RALT:
+            unregister_code(KC_RALT);
+            unregister_code(KC_RGUI);
+            break;
+    }
+}
+
+// Tap dance for the “Right Ctrl” key:
+// - hold: MO(_FN)
+// - tap: KC_APP
+// - tap and hold: KC_RCTL
+// - double tap: KC_RCTL
+// - double tap and hold: KC_APP
+// - triple tap: KC_APP
+enum td_rctl_state {
+    TD_RCTL_NOOP,
+    TD_RCTL_MO_FN,
+    TD_RCTL_APP,
+    TD_RCTL_RCTL,
+};
+
+static enum td_rctl_state td_rctl_state;
+
+static void td_rctl_finished(qk_tap_dance_state_t *state, void *user_data) {
+    switch (state->count) {
+        case 1:
+            if (state->pressed) {
+                td_rctl_state = TD_RCTL_MO_FN;
+            } else {
+                td_rctl_state = TD_RCTL_APP;
+            };
+            break;
+        case 2:
+            td_rctl_state = TD_RCTL_RCTL;
+            break;
+        case 3:
+            td_rctl_state = TD_RCTL_APP;
+            break;
+        default:
+            td_rctl_state = TD_RCTL_NOOP;
+            break;
+    }
+
+    switch (td_rctl_state) {
+        case TD_RCTL_NOOP:
+            break;
+        case TD_RCTL_MO_FN:
+            layer_on(_FN);
+            break;
+        case TD_RCTL_APP:
+            register_code(KC_APP);
+            break;
+        case TD_RCTL_RCTL:
+            register_code(KC_RCTL);
+            break;
+    }
+}
+
+static void td_rctl_reset(qk_tap_dance_state_t *state, void *user_data) {
+    switch (td_rctl_state) {
+        case TD_RCTL_NOOP:
+            break;
+        case TD_RCTL_MO_FN:
+            layer_off(_FN);
+            break;
+        case TD_RCTL_APP:
+            unregister_code(KC_APP);
+            break;
+        case TD_RCTL_RCTL:
+            unregister_code(KC_RCTL);
+            break;
+    }
+}
+
+qk_tap_dance_action_t tap_dance_actions[] = {
+    [TD_RALT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, td_ralt_finished, td_ralt_reset),
+    [TD_RCTL] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, td_rctl_finished, td_rctl_reset),
+};
 
 /* vim:set sw=4 sta et: */
