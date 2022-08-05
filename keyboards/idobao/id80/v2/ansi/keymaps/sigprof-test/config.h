@@ -32,3 +32,6 @@
 // whining sound when the PWM output frequency is about 8000 Hz; however, using
 // 4000 Hz looks good enough, but does not cause any annoying sounds.
 #define BACKLIGHT_CUSTOM_RESOLUTION (F_CPU / 4000)
+
+// Enable lighting layers
+#define RGBLIGHT_LAYERS

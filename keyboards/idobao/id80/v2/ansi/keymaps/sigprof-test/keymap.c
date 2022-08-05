@@ -152,6 +152,20 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 };
 
+enum rgblight_layer_ids {
+    RGBL_NUMPAD,
+};
+
+const rgblight_segment_t PROGMEM numpad_layer[] = RGBLIGHT_LAYER_SEGMENTS(
+    {  0, 1, HSV_AZURE },
+    {  6, 3, HSV_AZURE },
+    { 14, 2, HSV_AZURE }
+);
+
+const rgblight_segment_t* const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS_LIST(
+    numpad_layer
+);
+
 static struct {
     bool group_led : 1;
 } indicators;
@@ -165,6 +179,7 @@ static void update_indicators(void) {
 }
 
 void keyboard_post_init_user(void) {
+    rgblight_layers = my_rgb_layers;
     rgblight_set_effect_range(0, 16);
     update_indicators();
 }
@@ -179,6 +194,11 @@ bool led_update_user(led_t led_state) {
 
     // Keep the default Caps Lock LED function
     return true;
+}
+
+layer_state_t layer_state_set_user(layer_state_t state) {
+    rgblight_set_layer_state(RGBL_NUMPAD, layer_state_cmp(state, _NUMPAD));
+    return state;
 }
 
 bool get_clear_oneshot_layer(uint16_t keycode, keyrecord_t *record, bool default_value) {
