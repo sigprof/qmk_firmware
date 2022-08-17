@@ -26,7 +26,9 @@ enum custom_keycode {
 
 // This “keyboard” does not have any real keymaps; pretend that the whole
 // keymap is filled with TEST_KEY.
-uint16_t keymap_key_to_keycode(uint8_t layer, keypos_t key) { return TEST_KEY; }
+uint16_t keymap_key_to_keycode(uint8_t layer, keypos_t key) {
+    return TEST_KEY;
+}
 
 static keypos_t keypos_log_to_phys(keypos_t log_pos) {
     uint16_t bit = log_pos.col + log_pos.row * MATRIX_COLS;
