@@ -61,7 +61,7 @@ def matrix_pins(matrix_pins, postfix=''):
 def generate_matrix_size(kb_info_json, config_h_lines):
     """Add the matrix size to the config.h.
     """
-    if 'matrix_pins' in kb_info_json:
+    if 'matrix_size' in kb_info_json:
         col_count = kb_info_json['matrix_size']['cols']
         row_count = kb_info_json['matrix_size']['rows']
 
