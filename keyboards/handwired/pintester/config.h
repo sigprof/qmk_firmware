@@ -19,12 +19,6 @@
 
 #include "config_common.h"
 
-/* USB Device descriptor parameter */
-#define VENDOR_ID    0xFEED
-#define PRODUCT_ID   0x6480
-#define DEVICE_VER   0x0001
-#define MANUFACTURER QMK
-
 /*
  * Key matrix configuration parameters are set in config.h files for specific
  * boards, and then the matrix configuration is finalized in post_config.h.
