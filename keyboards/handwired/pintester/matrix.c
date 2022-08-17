@@ -18,11 +18,11 @@
 #include "pintester.h"
 
 #ifdef PINTESTER_ACTIVE_HIGH
-#    define set_pin_active(pin) setPinOutput(pin), writePinHigh(pin)
+#    define set_pin_active(pin) do { setPinOutput(pin); writePinHigh(pin); } while(0)
 #    define set_pin_inactive(pin) setPinInputLow(pin)
 #    define is_pin_active(pin) (!!readPin(pin))
 #else
-#    define set_pin_active(pin) setPinOutput(pin), writePinLow(pin)
+#    define set_pin_active(pin) do { setPinOutput(pin); writePinLow(pin); } while(0)
 #    define set_pin_inactive(pin) setPinInputHigh(pin)
 #    define is_pin_active(pin) (!readPin(pin))
 #endif
