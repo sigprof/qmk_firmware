@@ -1,5 +1,12 @@
 {
   "matrix_size": {
     "cols": 32
+  },
+  "layouts": {
+    "LAYOUT_ortho_1x1": {
+      "layout": [
+        {"x": 0, "y": 0, "matrix": [0, 0]}
+      ]
+    }
   }
 }
