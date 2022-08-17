@@ -1,4 +1,12 @@
 {
+  "manufacturer": "QMK",
+  "url": "",
+  "maintainer": "qmk",
+  "usb": {
+    "vid": "0xFEED",
+    "pid": "0x6480",
+    "device_version": "0.0.1"
+  },
   "matrix_size": {
     "cols": 32
   },
