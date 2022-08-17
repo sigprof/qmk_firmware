@@ -18,6 +18,8 @@
 #include "pintester.h"
 #include <stdio.h>
 
+_Static_assert(PINTESTER_PIN_COUNT * PINTESTER_PIN_COUNT <= MATRIX_ROWS * MATRIX_COLS, "The matrix size is too small to fit PINTESTER_PIN_COUNT * PINTESTER_PIN_COUNT bits");
+
 enum custom_keycode {
     TEST_KEY = SAFE_RANGE,
 };
