@@ -19,9 +19,6 @@
 
 #include "config_common.h"
 
-/* define if matrix has ghost (lacks anti-ghosting diodes) */
-//#define MATRIX_HAS_GHOST
-
 /* Disable features which cannot be used by this “keyboard”. */
 #define NO_ACTION_TAPPING
 #define NO_ACTION_LAYER
