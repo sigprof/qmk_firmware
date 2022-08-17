@@ -19,16 +19,6 @@
 
 #include "quantum.h"
 
-/*
- * This layout is present here only to stop the QMK build system from
- * complaining; it is not actually intended to be used.
- */
-#define LAYOUT_ortho_1x1( \
-    k00 \
-) { \
-    { k00 } \
-}
-
 struct pintester_pin_info {
     const char *name;
     const char *label;
