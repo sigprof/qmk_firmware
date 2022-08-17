@@ -36,16 +36,6 @@
 /* define if matrix has ghost (lacks anti-ghosting diodes) */
 //#define MATRIX_HAS_GHOST
 
-/* disable these deprecated features by default */
-#define NO_ACTION_MACRO
-#define NO_ACTION_FUNCTION
-
 /* Disable features which cannot be used by this “keyboard”. */
 #define NO_ACTION_TAPPING
 #define NO_ACTION_LAYER
-
-/*
- * This should be at least 2 to handle both events for a direct connection of
- * two pins without a diode in a single scan.
- */
-#define QMK_KEYS_PER_SCAN 4
