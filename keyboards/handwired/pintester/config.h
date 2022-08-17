@@ -19,11 +19,6 @@
 
 #include "config_common.h"
 
-/*
- * Key matrix configuration parameters are set in config.h files for specific
- * boards, and then the matrix configuration is finalized in post_config.h.
- */
-
 /* Debounce reduces chatter (unintended double-presses) - set 0 if debouncing is not needed */
 #define DEBOUNCE 5
 
