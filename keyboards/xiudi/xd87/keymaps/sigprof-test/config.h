@@ -37,9 +37,14 @@
 // PWM frequency, which is very noticeable.  However, another concern with XD87
 // is that PWM for the backlight is implemented by toggling the pin in software
 // (due to bad hardware design not using a PWM-capable pin for that purpose),
-// therefore the PWM frequency should not be set too high.  Use 2000 Hz as a
-// compromise.
-#define BACKLIGHT_CUSTOM_RESOLUTION (F_CPU / 2000)
+// therefore the PWM frequency should not be set too high.  Also the PWM
+// frequency must not be close to a multiple of 1000 Hz, otherwise USB
+// interrupts will introduce visible flickering too.
+//
+// Setting BACKLIGHT_CUSTOM_RESOLUTION to 0x1FFF gives ≈1953 Hz PWM frequency,
+// which works well enough.
+//
+#define BACKLIGHT_CUSTOM_RESOLUTION 0x1FFF
 
 // Increase the number of RGB LEDs to test the behavior with a really long
 // chain of WS2812 LEDs.  For 105 LEDs (imagine a fullsize ISO keyboard with
