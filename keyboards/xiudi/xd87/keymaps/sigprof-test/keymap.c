@@ -348,3 +348,17 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 void matrix_scan_user(void) {
     matrix_scan_esc_release_by_timer();
 }
+
+void eeconfig_init_user(void) {
+    // RGB Lighting needs to be enabled for the lighting layers to work;
+    // however, the default color may be set to black.
+    rgblight_enable();
+    rgblight_mode(RGBLIGHT_MODE_STATIC_LIGHT);
+    rgblight_sethsv(HSV_BLACK);
+
+    // The backlight level needs to be set, but the backlight itself should be
+    // disabled (it would be enabled with the saved level by the group
+    // indicator code).
+    backlight_level(BACKLIGHT_LEVELS / 3);
+    backlight_disable();
+}
