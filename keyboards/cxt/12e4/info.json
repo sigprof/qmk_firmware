@@ -1,0 +1,144 @@
+{
+    "manufacturer": "CXT Labs",
+    "keyboard_name": "12E4",
+    "maintainer": "qmk",
+    "url": "",
+    "usb": {
+        "vid": "0x6378",
+        "pid": "0x12E4",
+        "device_version": "1.0.0"
+    },
+    "processor": "atmega32u4",
+    "bootloader": "atmel-dfu",
+    "features": {
+        "bootmagic": true,
+        "command": false,
+        "console": false,
+        "extrakey": true,
+        "mousekey": true,
+        "nkro": true,
+        "rgblight": false,
+        "rgb_matrix": true
+    },
+    "build": {
+        "lto": true
+    },
+    "diode_direction": "ROW2COL",
+    "matrix_pins": {
+        "cols": ["D4", "D7", "B4", "B5"],
+        "rows": ["C7", "C6", "D6", "F4"]
+    },
+    "encoder": {
+        "enabled": true,
+        "rotary": [
+            { "pin_a": "F5", "pin_b": "F6" },
+            { "pin_a": "E6", "pin_b": "F0" },
+            { "pin_a": "B2", "pin_b": "B3" },
+            { "pin_a": "D5", "pin_b": "D3" }
+        ]
+    },
+    "rgblight": {
+        "led_count": 12,
+        "pin": "F7",
+        "animations": {
+            "alternating": true,
+            "breathing": true,
+            "christmas": true,
+            "knight": true,
+            "rainbow_mood": true,
+            "rainbow_swirl": true,
+            "rgb_test": true,
+            "snake": true,
+            "static_gradient": true,
+            "twinkle": true
+        },
+        "sleep": true
+    },
+    "rgb_matrix": {
+        "driver": "WS2812",
+	"center_point": [64, 40],
+        "layout": [
+            { "flags": 4, "matrix": [0, 0], "x":  16, "y":  8 },
+            { "flags": 4, "matrix": [0, 1], "x":  48, "y":  8 },
+            { "flags": 4, "matrix": [0, 2], "x":  80, "y":  8 },
+            { "flags": 4, "matrix": [0, 3], "x": 112, "y":  8 },
+            { "flags": 4, "matrix": [1, 0], "x":  16, "y": 40 },
+            { "flags": 4, "matrix": [1, 1], "x":  48, "y": 40 },
+            { "flags": 4, "matrix": [1, 2], "x":  80, "y": 40 },
+            { "flags": 4, "matrix": [1, 3], "x": 112, "y": 40 },
+            { "flags": 4, "matrix": [2, 0], "x":  16, "y": 72 },
+            { "flags": 4, "matrix": [2, 1], "x":  48, "y": 72 },
+            { "flags": 4, "matrix": [2, 2], "x":  80, "y": 72 },
+            { "flags": 4, "matrix": [2, 3], "x": 112, "y": 72 }
+        ],
+        "animations": {
+            "alphas_mods": true,
+            "gradient_up_down": true,
+            "gradient_left_right": true,
+            "breathing": true,
+            "band_sat": true,
+            "band_val": true,
+            "band_pinwheel_sat": true,
+            "band_pinwheel_val": true,
+            "band_spiral_sat": true,
+            "band_spiral_val": true,
+            "cycle_all": true,
+            "cycle_left_right": true,
+            "cycle_up_down": true,
+            "rainbow_moving_chevron": true,
+            "cycle_out_in": true,
+            "cycle_out_in_dual": true,
+            "cycle_pinwheel": true,
+            "cycle_spiral": true,
+            "dual_beacon": true,
+            "rainbow_beacon": true,
+            "rainbow_pinwheels": true,
+            "raindrops": true,
+            "jellybean_raindrops": true,
+            "hue_breathing": true,
+            "hue_pendulum": true,
+            "hue_wave": true,
+            "pixel_rain": true,
+            "pixel_fractal": true,
+            "typing_heatmap": true,
+            "digital_rain": true,
+            "solid_reactive_simple": true,
+            "solid_reactive": true,
+            "solid_reactive_wide": true,
+            "solid_reactive_multiwide": true,
+            "solid_reactive_cross": true,
+            "solid_reactive_multicross": true,
+            "solid_reactive_nexus": true,
+            "solid_reactive_multinexus": true,
+            "splash": true,
+            "multisplash": true,
+            "solid_splash": true,
+            "solid_multisplash": true
+        }
+    },
+    "layouts": {
+        "LAYOUT": {
+            "layout": [
+                { "label": "A",  "matrix": [0, 0], "x": 0,    "y": 0    },
+                { "label": "B",  "matrix": [0, 1], "x": 1,    "y": 0    },
+                { "label": "C",  "matrix": [0, 2], "x": 2,    "y": 0    },
+                { "label": "D",  "matrix": [0, 3], "x": 3,    "y": 0    },
+                { "label": "e0", "matrix": [3, 2], "x": 4.5,  "y": 0    },
+                { "label": "e1", "matrix": [3, 3], "x": 6,    "y": 0    },
+                { "label": "E",  "matrix": [1, 0], "x": 0,    "y": 1    },
+                { "label": "F",  "matrix": [1, 1], "x": 1,    "y": 1    },
+                { "label": "G",  "matrix": [1, 2], "x": 2,    "y": 1    },
+                { "label": "H",  "matrix": [1, 3], "x": 3,    "y": 1    },
+                { "label": "e2", "matrix": [3, 1], "x": 5.25, "y": 1.5  },
+                { "label": "I",  "matrix": [2, 0], "x": 0,    "y": 2    },
+                { "label": "J",  "matrix": [2, 1], "x": 1,    "y": 2    },
+                { "label": "K",  "matrix": [2, 2], "x": 2,    "y": 2    },
+                { "label": "L",  "matrix": [2, 3], "x": 3,    "y": 2    },
+                { "label": "e3", "matrix": [3, 0], "x": 5.25, "y": 3.25 }
+            ]
+        }
+    },
+    "dynamic_keymap": {
+        "layer_count": 8
+    }
+}
