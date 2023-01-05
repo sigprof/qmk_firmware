@@ -19,8 +19,6 @@
 
 #include "config_common.h"
 
-#define PRODUCT Pin Tester Teensy 2.0
-
 /*
  * List of all GPIO pins available for the keyboard matrix.  Each element of
  * the list must be one of the following macros:
@@ -64,3 +62,7 @@
  * number of items in PINTESTER_PINS).
  */
 #define PINTESTER_PIN_COUNT 25
+
+// ceil(PINTESTER_PIN_COUNT * PINTESTER_PIN_COUNT / MATRIX_COLS)
+// Precalculated to satisfy the data-driven code.
+#define MATRIX_ROWS 20

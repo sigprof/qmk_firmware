@@ -1,0 +1,5 @@
+{
+  "keyboard_name": "Pin Tester ATmega32U4",
+  "processor": "atmega32u4",
+  "bootloader": "atmel-dfu"
+}

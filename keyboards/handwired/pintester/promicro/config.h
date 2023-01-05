@@ -51,3 +51,7 @@
  * number of items in PINTESTER_PINS).
  */
 #define PINTESTER_PIN_COUNT 18
+
+// ceil(PINTESTER_PIN_COUNT * PINTESTER_PIN_COUNT / MATRIX_COLS)
+// Precalculated to satisfy the data-driven code.
+#define MATRIX_ROWS 11

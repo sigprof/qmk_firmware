@@ -1,5 +1,1 @@
-# MCU name
-MCU = atmega32u4
-
-# Bootloader selection
-BOOTLOADER = caterina
+# This file intentionally left blank.

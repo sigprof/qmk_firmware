@@ -19,8 +19,6 @@
 
 #include "config_common.h"
 
-#define PRODUCT Pin Tester Elite-C
-
 /*
  * List of all GPIO pins available for the keyboard matrix.  Each element of
  * the list must be one of the following macros:
@@ -59,3 +57,7 @@
  * number of items in PINTESTER_PINS).
  */
 #define PINTESTER_PIN_COUNT 24
+
+// ceil(PINTESTER_PIN_COUNT * PINTESTER_PIN_COUNT / MATRIX_COLS)
+// Precalculated to satisfy the data-driven code.
+#define MATRIX_ROWS 18

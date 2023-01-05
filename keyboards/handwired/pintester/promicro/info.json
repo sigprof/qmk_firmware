@@ -1,6 +1,4 @@
 {
   "keyboard_name": "Pin Tester Pro Micro",
-  "matrix_size": {
-    "rows": 11
-  }
+  "development_board": "promicro"
 }

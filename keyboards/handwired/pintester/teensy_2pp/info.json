@@ -1,0 +1,5 @@
+{
+  "keyboard_name": "Pin Tester Teensy++ 2.0",
+  "processor": "at90usb1286",
+  "bootloader": "halfkay"
+}
