@@ -5,13 +5,13 @@
 
 #include "config_common.h"
 
-/*
- * List of all GPIO pins available for the keyboard matrix.  Each element of
- * the list must be one of the following macros:
- *   - PT_PIN(pin) - normal pin;
- *   - PT_PIN_LABEL(pin, label) - pin for which the label on the actual PCB is
- *     significantly different from the QMK pin name.
- */
+// clang-format off
+
+// List of all GPIO pins available for the keyboard matrix.  Each element of
+// the list must be one of the following macros:
+//   - PT_PIN(pin) - normal pin;
+//   - PT_PIN_LABEL(pin, label) - pin for which the label on the actual PCB is
+//     significantly different from the QMK pin name.
 #define PINTESTER_PINS  \
         PT_PIN(GP0),    \
         PT_PIN(GP1),    \
@@ -44,13 +44,13 @@
         PT_PIN(GP28),   \
         PT_PIN(GP29)
 
+// clang-format on
+
 // Ignore pins which are not available on Raspberry Pi Pico by default.
 #define PINTESTER_DEFAULT_IGNORE_PINS   GP23, GP24, GP25, GP29
 
-/*
- * Total number of GPIO pins available for the keyboard matrix (must match the
- * number of items in PINTESTER_PINS).
- */
+// Total number of GPIO pins available for the keyboard matrix (must match the
+// number of items in PINTESTER_PINS).
 #define PINTESTER_PIN_COUNT 30
 
 // ceil(PINTESTER_PIN_COUNT * PINTESTER_PIN_COUNT / MATRIX_COLS)

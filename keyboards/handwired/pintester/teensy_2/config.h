@@ -5,13 +5,13 @@
 
 #include "config_common.h"
 
-/*
- * List of all GPIO pins available for the keyboard matrix.  Each element of
- * the list must be one of the following macros:
- *   - PT_PIN(pin) - normal pin;
- *   - PT_PIN_LABEL(pin, label) - pin for which the label on the actual PCB is
- *     significantly different from the QMK pin name.
- */
+// clang-format off
+
+// List of all GPIO pins available for the keyboard matrix.  Each element of
+// the list must be one of the following macros:
+//   - PT_PIN(pin) - normal pin;
+//   - PT_PIN_LABEL(pin, label) - pin for which the label on the actual PCB is
+//     significantly different from the QMK pin name.
 #define PINTESTER_PINS  \
         PT_PIN(B0),     \
         PT_PIN(B1),     \
@@ -39,14 +39,14 @@
         PT_PIN(F6),     \
         PT_PIN(F7)
 
+// clang-format on
+
 // The D6 pin has a LED on it, which results in an undefined logical level if
 // that pin is used as an input.
 #define PINTESTER_DEFAULT_IGNORE_PINS   D6
 
-/*
- * Total number of GPIO pins available for the keyboard matrix (must match the
- * number of items in PINTESTER_PINS).
- */
+// Total number of GPIO pins available for the keyboard matrix (must match the
+// number of items in PINTESTER_PINS).
 #define PINTESTER_PIN_COUNT 25
 
 // ceil(PINTESTER_PIN_COUNT * PINTESTER_PIN_COUNT / MATRIX_COLS)

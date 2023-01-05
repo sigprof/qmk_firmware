@@ -5,13 +5,13 @@
 
 #include "config_common.h"
 
-/*
- * List of all GPIO pins available for the keyboard matrix.  Each element of
- * the list must be one of the following macros:
- *   - PT_PIN(pin) - normal pin;
- *   - PT_PIN_LABEL(pin, label) - pin for which the label on the actual PCB is
- *     significantly different from the QMK pin name.
- */
+// clang-format off
+
+// List of all GPIO pins available for the keyboard matrix.  Each element of
+// the list must be one of the following macros:
+//   - PT_PIN(pin) - normal pin;
+//   - PT_PIN_LABEL(pin, label) - pin for which the label on the actual PCB is
+//     significantly different from the QMK pin name.
 #define PINTESTER_PINS  \
         PT_PIN(D3),     \
         PT_PIN(D2),     \
@@ -38,10 +38,10 @@
         PT_PIN(F4),     \
         PT_PIN(B0)
 
-/*
- * Total number of GPIO pins available for the keyboard matrix (must match the
- * number of items in PINTESTER_PINS).
- */
+// clang-format on
+
+// Total number of GPIO pins available for the keyboard matrix (must match the
+// number of items in PINTESTER_PINS).
 #define PINTESTER_PIN_COUNT 24
 
 // ceil(PINTESTER_PIN_COUNT * PINTESTER_PIN_COUNT / MATRIX_COLS)

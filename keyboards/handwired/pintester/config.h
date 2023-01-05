@@ -10,6 +10,6 @@
 // won't work due to overlap with some special values).
 #define MATRIX_COLS 32
 
-/* Disable features which cannot be used by this “keyboard”. */
+// Disable features which cannot be used by this “keyboard”.
 #define NO_ACTION_TAPPING
 #define NO_ACTION_LAYER

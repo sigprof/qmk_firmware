@@ -5,13 +5,13 @@
 
 #include "config_common.h"
 
-/*
- * List of all GPIO pins available for the keyboard matrix.  Each element of
- * the list must be one of the following macros:
- *   - PT_PIN(pin) - normal pin;
- *   - PT_PIN_LABEL(pin, label) - pin for which the label on the actual PCB is
- *     significantly different from the QMK pin name.
- */
+// clang-format off
+
+// List of all GPIO pins available for the keyboard matrix.  Each element of
+// the list must be one of the following macros:
+//   - PT_PIN(pin) - normal pin;
+//   - PT_PIN_LABEL(pin, label) - pin for which the label on the actual PCB is
+//     significantly different from the QMK pin name.
 #define PINTESTER_PINS  \
         PT_PIN(B0),     \
         PT_PIN(B1),     \
@@ -40,13 +40,13 @@
         PT_PIN(F6),     \
         PT_PIN(F7)
 
-// The E2 pin is used for the HWB function in most cases.
-#define PINTESTER_DEFAULT_IGNORE_PINS   E2
+// clang-format on
 
-/*
- * Total number of GPIO pins available for the keyboard matrix (must match the
- * number of items in PINTESTER_PINS).
- */
+// The E2 pin is used for the HWB function in most cases.
+#define PINTESTER_DEFAULT_IGNORE_PINS E2
+
+// Total number of GPIO pins available for the keyboard matrix (must match the
+// number of items in PINTESTER_PINS).
 #define PINTESTER_PIN_COUNT 26
 
 // ceil(PINTESTER_PIN_COUNT * PINTESTER_PIN_COUNT / MATRIX_COLS)
