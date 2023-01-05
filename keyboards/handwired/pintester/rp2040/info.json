@@ -2,7 +2,4 @@
   "keyboard_name": "Pin Tester RP2040",
   "processor": "RP2040",
   "bootloader": "rp2040",
-  "matrix_size": {
-    "rows": 29
-  }
 }

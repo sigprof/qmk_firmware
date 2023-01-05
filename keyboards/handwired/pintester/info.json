@@ -8,9 +8,6 @@
     "device_version": "0.0.1"
   },
   "debounce": 5,
-  "matrix_size": {
-    "cols": 32
-  },
   "layouts": {
     "LAYOUT_ortho_1x1": {
       "layout": [
