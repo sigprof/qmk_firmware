@@ -1,0 +1,6 @@
+{
+  "keyboard_name": "Pin Tester Blackpill STM32F401 TinyUF2",
+  "processor": "STM32F401",
+  "board": "BLACKPILL_STM32_F401",
+  "bootloader": "tinyuf2"
+}
