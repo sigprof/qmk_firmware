@@ -1,0 +1,5 @@
+{
+  "keyboard_name": "Pin Tester Teensy 3.2",
+  "processor": "MK20DX256",
+  "bootloader": "halfkay"
+}
