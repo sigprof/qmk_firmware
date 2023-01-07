@@ -40,8 +40,13 @@ static void set_all_pins_inactive(void) {
     }
 }
 
-void matrix_init_custom(void) {
+static void init_pin_state(void) {
     _Static_assert(sizeof(pin_info) / sizeof(pin_info[0]) == PINTESTER_PIN_COUNT, "PINTESTER_PIN_COUNT must match PINTESTER_PINS");
+
+    static bool init_done = false;
+    if (init_done) {
+        return;
+    }
 
     // Convert PINTESTER_IGNORE_PINS into per-pin .enabled flags.
     for (uint8_t i = 0; i < PINTESTER_PIN_COUNT; i++) {
@@ -55,6 +60,21 @@ void matrix_init_custom(void) {
         pin_state[i].enabled = enabled;
     }
 
+    init_done = true;
+}
+
+bool pintester_is_pin_enabled(pin_t pin) {
+    init_pin_state();
+    for (uint8_t i = 0; i < PINTESTER_PIN_COUNT; i++) {
+        if (pin_info[i].pin == pin) {
+            return pin_state[i].enabled;
+        }
+    }
+    return false;
+}
+
+void matrix_init_custom(void) {
+    init_pin_state();
     set_all_pins_inactive();
 }
 

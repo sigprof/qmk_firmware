@@ -42,14 +42,19 @@
         PT_PIN(B0),     \
         PT_PIN(B1),     \
         PT_PIN(B10),    \
-        PT_PIN(B11)
+        PT_PIN(B11),    \
+        PT_PIN(A13),    \
+        PT_PIN(A14)
 
 // clang-format on
 
+// Exclude SWD pins by default.
+#define PINTESTER_DEFAULT_IGNORE_PINS A13, A14
+
 // Total number of GPIO pins available for the keyboard matrix (must match the
 // number of items in PINTESTER_PINS).
-#define PINTESTER_PIN_COUNT 30
+#define PINTESTER_PIN_COUNT 32
 
 // ceil(PINTESTER_PIN_COUNT * PINTESTER_PIN_COUNT / MATRIX_COLS)
 // Precalculated to satisfy the data-driven code.
-#define MATRIX_ROWS 29
+#define MATRIX_ROWS 32

@@ -23,3 +23,5 @@ struct pintester_pin_state {
 
 extern const struct pintester_pin_info pin_info[];
 extern struct pintester_pin_state      pin_state[];
+
+bool pintester_is_pin_enabled(pin_t pin);
