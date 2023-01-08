@@ -16,6 +16,10 @@ uint16_t keymap_key_to_keycode(uint8_t layer, keypos_t key) {
     return TEST_KEY;
 }
 
+// Convert the matrix position from the logical representation (where column
+// numbers are limited to 0...31 to fit the row data into uint32_t) to the
+// physical representation (where row and column numbers correspond to the
+// indices in pin_info[] and pin_state[]).
 static keypos_t keypos_log_to_phys(keypos_t log_pos) {
     uint16_t bit = log_pos.col + log_pos.row * MATRIX_COLS;
     uint16_t row = bit / PINTESTER_PIN_COUNT;
@@ -59,6 +63,8 @@ static void send_release(keypos_t phys_pos) {
 
 void matrix_scan_user(void) {
     if ((delayed_release.col != 255) && timer_elapsed(delayed_release_timer) > REVERSE_REPORT_DELAY) {
+        // The release event for the reverse direction key did not arrive
+        // before the timeout; send the original release report independently.
         send_release(delayed_release);
         delayed_release.col = delayed_release.row = 255;
     }
@@ -72,6 +78,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
         }
         if (record->event.pressed) {
+            // Handle key press events.
+
             // If a release key report was pending, send it now.
             if (delayed_release.col != 255) {
                 send_release(delayed_release);
@@ -91,12 +99,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 SEND_STRING("[");
                 send_pin_name(phys_pos.col);
             } else if (last_pressed && (last_phys.row == phys_pos.col) && (last_phys.col == phys_pos.row) && (timer_elapsed(press_timer) < REVERSE_REPORT_DELAY)) {
-                // This is the reverse direction key from the one that was just
+                // This is the reverse direction key for the one that was just
                 // pressed; send a shortened report for it and set the flag
                 // which would be used to handle release events.
                 reverse_pressed = true;
                 SEND_STRING("(<>");
             } else {
+                // Send the normal report for the pressed key.
                 SEND_STRING("(");
                 send_pin_name(phys_pos.row);
                 SEND_STRING(",");
@@ -104,28 +113,53 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             press_timer = timer_read();
         } else {
+            // Handle key release events.
             if (last_pressed && (last_phys.col == phys_pos.col) && (last_phys.row == phys_pos.row)) {
+                // The same key as in last_phys was released - send the short
+                // form of release report for it.
                 if (delayed_release.col != 255) {
+                    // If a delayed release was pending in this state, it must
+                    // be for the reverse direction key which happened to be
+                    // registered as released first.  Send the short form for
+                    // that key too, and reset the delayed release state.
                     delayed_release.col = delayed_release.row = 255;
                     SEND_STRING(")");
                 }
                 if (phys_pos.col == phys_pos.row) {
+                    // Send the short form for a direct pin key release.
                     SEND_STRING("]");
                 } else if (reverse_pressed) {
+                    // Normal press -> reverse press -> reverse release; send
+                    // the short form for the reverse key and restore the state
+                    // as if it was after the normal press.  If the next event
+                    // is the release of the normal key, it will be handled by
+                    // sending the short form of release report.
                     reverse_pressed   = false;
                     last_phys.row     = phys_pos.col;
                     last_phys.col     = phys_pos.row;
                     last_phys_updated = true;
                     SEND_STRING(")");
                 } else {
+                    // Send the short form for a non-direct pin key release.
                     SEND_STRING(")");
                 }
             } else if (last_pressed && reverse_pressed && (last_phys.row == phys_pos.col) && (last_phys.col == phys_pos.row)) {
+                // Both the normal and the reverse key were pressed, and now
+                // the normal key is registered as released.  In theory it is
+                // possible that the normal and reverse key are independent, so
+                // instead of reporting the release event in the short form
+                // immediately (which would be incorrect if the keys are
+                // independent) the actual released key is remembered in
+                // delayed_release; it would be reported independently if the
+                // matching release event for the reverse key does not arrive
+                // before REVERSE_REPORT_DELAY.
                 reverse_pressed       = false;
                 last_phys_updated     = true;
                 delayed_release       = phys_pos;
                 delayed_release_timer = timer_read();
             } else {
+                // The release event does not match the latest press event, and
+                // needs to be reported in the full format.
                 SEND_STRING(" -");
                 if (phys_pos.col == phys_pos.row) {
                     send_pin_name(phys_pos.col);
@@ -139,6 +173,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
         }
 
+        // Remember the last processed event unless it's one of the special
+        // cases already handled above.
         if (!last_phys_updated) {
             last_phys    = phys_pos;
             last_pressed = record->event.pressed;
