@@ -14,7 +14,7 @@ Custom matrix code is used to scan all controller pins and try to find connectio
 
 - Initially all pins are set to the “input with pull-up” state, and any pins which read as active (low) are assumed to be active direct pins; these pins are reported and then excluded from the subsequent scan.
 - For each pin that was not detected as an active direct pin:
-  - The pin is set to the “output low” state
+  - The pin is set to the “output low” state.
   - All other non-excluded pins (including those that were previously used as outputs) are read; for any pins which read as active (low) the pair of output and input pins is reported.
   - The pin is returned to the “input with pull-up” state.
 
