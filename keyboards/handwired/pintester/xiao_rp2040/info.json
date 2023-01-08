@@ -1,0 +1,5 @@
+{
+  "keyboard_name": "Pin Tester Xiao RP2040",
+  "processor": "RP2040",
+  "bootloader": "rp2040"
+}
