@@ -1,0 +1,5 @@
+{
+  "keyboard_name": "Pin Tester Waveshare RP2040-Zero",
+  "processor": "RP2040",
+  "bootloader": "rp2040"
+}
