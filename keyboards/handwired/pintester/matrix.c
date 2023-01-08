@@ -36,6 +36,19 @@ const struct pintester_pin_info pin_info[] = {PINTESTER_PINS};
 // Runtime pin state for all controller pins.
 struct pintester_pin_state pin_state[PINTESTER_PIN_COUNT];
 
+// Matrix startup delay (ms).  Should be longer than the time for the host to
+// enumerate the USB device and initialize the HID keyboard driver, so that
+// keys that appear always pressed may be properly reported (usually such keys
+// are lost when they are detected as pressed before the host completes the USB
+// and HID driver initialization).
+#ifndef PINTESTER_STARTUP_DELAY
+#    define PINTESTER_STARTUP_DELAY 2000
+#endif
+
+// Timer and flag to implement PINTESTER_STARTUP_DELAY.
+static uint16_t startup_delay_timer;
+static bool     startup_delay_timer_active;
+
 // List of pins which should not be touched even though they are included in
 // PINTESTER_PINS.
 static const pin_t ignore_pins[] = {PINTESTER_IGNORE_PINS};
@@ -84,9 +97,20 @@ bool pintester_is_pin_enabled(pin_t pin) {
 void matrix_init_custom(void) {
     init_pin_state();
     set_all_pins_inactive();
+
+    startup_delay_timer        = timer_read();
+    startup_delay_timer_active = true;
 }
 
 bool matrix_scan_custom(matrix_row_t current_matrix[]) {
+    // Skip matrix scanning during the startup delay.
+    if (startup_delay_timer_active) {
+        if (timer_elapsed(startup_delay_timer) <= PINTESTER_STARTUP_DELAY) {
+            return false;
+        }
+        startup_delay_timer_active = false;
+    }
+
     bool changed = false;
 
     // Read the pin states when no pins are activated as outputs; store those
