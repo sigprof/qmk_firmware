@@ -21,6 +21,25 @@
 #    define is_pin_active(pin) (!readPin(pin))
 #endif
 
+// Handle the PINTESTER_INPUT_PINS and PINTESTER_OUTPUT_PINS defines:
+//  - either both of them must be defined, or none of them;
+//  - if they are defined, PINTESTER_IGNORE_PINS must not be defined, and
+//    PINTESTER_DEFAULT_IGNORE_PINS is ignored (this is handled by defining
+//    PINTESTER_IGNORE_PINS to an empty value);
+//  - if they are not defined, define them to nothing.
+#if defined(PINTESTER_INPUT_PINS) && defined(PINTESTER_OUTPUT_PINS)
+#    if defined(PINTESTER_IGNORE_PINS)
+#        error "PINTESTER_IGNORE_PINS cannot be used together with PINTESTER_INPUT_PINS and PINTESTER_OUTPUT_PINS"
+#    else
+#        define PINTESTER_IGNORE_PINS
+#    endif
+#elif defined(PINTESTER_INPUT_PINS) || defined(PINTESTER_OUTPUT_PINS)
+#    error "Defining only one of PINTESTER_INPUT_PINS and PINTESTER_OUTPUT_PINS is not supported"
+#else
+#    define PINTESTER_INPUT_PINS
+#    define PINTESTER_OUTPUT_PINS
+#endif
+
 // Set the default value for PINTESTER_IGNORE_PINS if it was not defined.
 #ifndef PINTESTER_IGNORE_PINS
 #    ifdef PINTESTER_DEFAULT_IGNORE_PINS
@@ -53,9 +72,13 @@ static bool     startup_delay_timer_active;
 // PINTESTER_PINS.
 static const pin_t ignore_pins[] = {PINTESTER_IGNORE_PINS};
 
+// Explicit lists of input and output pins.
+static const pin_t input_pins[]  = {PINTESTER_INPUT_PINS};
+static const pin_t output_pins[] = {PINTESTER_OUTPUT_PINS};
+
 static void set_all_pins_inactive(void) {
     for (uint8_t i = 0; i < PINTESTER_PIN_COUNT; i++) {
-        if (pin_state[i].enabled) {
+        if (pin_state[i].enable_output || pin_state[i].enable_input) {
             set_pin_inactive(pin_info[i].pin);
         }
     }
@@ -69,16 +92,37 @@ static void init_pin_state(void) {
         return;
     }
 
-    // Convert PINTESTER_IGNORE_PINS into per-pin .enabled flags.
+    // Convert pin lists into per-pin enable_input and enable_output flags.
     for (uint8_t i = 0; i < PINTESTER_PIN_COUNT; i++) {
-        bool enabled = true;
-        for (uint8_t j = 0; j < sizeof(ignore_pins) / sizeof(ignore_pins[0]); j++) {
-            if (pin_info[i].pin == ignore_pins[j]) {
-                enabled = false;
-                break;
+        pin_t pin = pin_info[i].pin;
+        if (ARRAY_SIZE(input_pins) > 0 && ARRAY_SIZE(output_pins) > 0) {
+            // Using explicit lists of input and output pins.
+            pin_state[i].enable_input  = false;
+            pin_state[i].enable_output = false;
+            for (uint8_t j = 0; j < ARRAY_SIZE(input_pins); j++) {
+                if (input_pins[j] == pin) {
+                    pin_state[i].enable_input = true;
+                    break;
+                }
+            }
+            for (uint8_t j = 0; j < ARRAY_SIZE(output_pins); j++) {
+                if (output_pins[j] == pin) {
+                    pin_state[i].enable_output = true;
+                    break;
+                }
+            }
+        } else {
+            // Using all pins except ignored ones for both input and output.
+            pin_state[i].enable_input  = true;
+            pin_state[i].enable_output = true;
+            for (uint8_t j = 0; j < ARRAY_SIZE(ignore_pins); j++) {
+                if (ignore_pins[j] == pin) {
+                    pin_state[i].enable_input  = false;
+                    pin_state[i].enable_output = false;
+                    break;
+                }
             }
         }
-        pin_state[i].enabled = enabled;
     }
 
     init_done = true;
@@ -88,7 +132,7 @@ bool pintester_is_pin_enabled(pin_t pin) {
     init_pin_state();
     for (uint8_t i = 0; i < PINTESTER_PIN_COUNT; i++) {
         if (pin_info[i].pin == pin) {
-            return pin_state[i].enabled;
+            return pin_state[i].enable_input || pin_state[i].enable_output;
         }
     }
     return false;
@@ -118,7 +162,7 @@ bool matrix_scan_custom(matrix_row_t current_matrix[]) {
     set_all_pins_inactive();
     matrix_output_unselect_delay(0, true);
     for (uint8_t phys_col = 0; phys_col < PINTESTER_PIN_COUNT; phys_col++) {
-        if (pin_state[phys_col].enabled) {
+        if (pin_state[phys_col].enable_input) {
             pin_state[phys_col].active = is_pin_active(pin_info[phys_col].pin);
         }
     }
@@ -130,10 +174,11 @@ bool matrix_scan_custom(matrix_row_t current_matrix[]) {
 
     // Now scan the whole matrix.
     for (uint8_t phys_row = 0; phys_row < PINTESTER_PIN_COUNT; phys_row++) {
-        // If the pin is enabled, activate it, otherwise just continue with the
-        // rest of scanning loop (do not short circuit it, because the same
-        // number of bits must be written to the logical matrix).
-        if (pin_state[phys_row].enabled) {
+        // If the pin is enabled for output, activate it, otherwise just
+        // continue with the rest of scanning loop (do not short circuit it,
+        // because the same number of bits must be written to the logical
+        // matrix).
+        if (pin_state[phys_row].enable_output) {
             set_pin_active(pin_info[phys_row].pin);
             matrix_output_select_delay();
         }
@@ -141,7 +186,7 @@ bool matrix_scan_custom(matrix_row_t current_matrix[]) {
         // Read the state of all other pins after activating one pin.
         for (uint8_t phys_col = 0; phys_col < PINTESTER_PIN_COUNT; phys_col++) {
             bool active;
-            if (!pin_state[phys_row].enabled || !pin_state[phys_col].enabled) {
+            if (!pin_state[phys_row].enable_output || !pin_state[phys_col].enable_input) {
                 // Ignored pins are always considered inactive.
                 active = false;
             } else if (phys_col == phys_row) {
@@ -176,7 +221,7 @@ bool matrix_scan_custom(matrix_row_t current_matrix[]) {
         }
 
         // If the pin was activated as output before, deactivate it again.
-        if (pin_state[phys_row].enabled) {
+        if (pin_state[phys_row].enable_output) {
             set_pin_inactive(pin_info[phys_row].pin);
             matrix_output_unselect_delay(0, true);
         }

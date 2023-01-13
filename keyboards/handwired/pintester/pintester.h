@@ -18,7 +18,8 @@ struct pintester_pin_info {
 
 struct pintester_pin_state {
     bool active : 1;
-    bool enabled : 1;
+    bool enable_input : 1;
+    bool enable_output : 1;
 };
 
 extern const struct pintester_pin_info pin_info[];
