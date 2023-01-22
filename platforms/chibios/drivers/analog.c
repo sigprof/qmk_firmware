@@ -18,6 +18,9 @@
 #include <ch.h>
 #include <hal.h>
 
+#include <print.h>
+#include <timer.h>
+
 #if !HAL_USE_ADC
 #    error "You need to set HAL_USE_ADC to TRUE in your halconf.h to use the ADC."
 #endif
@@ -31,7 +34,15 @@
 #endif
 
 #if STM32_ADCV3_OVERSAMPLING
-#    error "STM32 ADCV3 Oversampling is not supported at this time."
+// Apparently all ADCV3 chips that support oversampling (STM32L4xx, STM32L4xx+,
+// STM32G4xx, STM32WB[35]x) have errata like “Wrong ADC result if conversion
+// done late after calibration or previous conversion”; the workaround is to
+// perform a dummy conversion and discard its result.  STM32G4xx chips also
+// have the “ADC channel 0 converted instead of the required ADC channel”
+// errata, one workaround for which is also to perform a dummy conversion.
+#    define ADC_DUMMY_CONVERSIONS_AT_START 1
+#else
+#    define ADC_DUMMY_CONVERSIONS_AT_START 0
 #endif
 
 // Otherwise assume V3
@@ -78,6 +89,8 @@
 #        define ADC_COUNT 1
 #    elif defined(STM32F3XX)
 #        define ADC_COUNT 4
+#    elif defined(STM32L4XX)
+#        define ADC_COUNT 3
 #    else
 #        error "ADC_COUNT has not been set for this ARM microcontroller."
 #    endif
@@ -89,13 +102,24 @@
 #    error "The ARM ADC implementation currently only supports reading one channel at a time."
 #endif
 
+// Add dummy conversions as extra channels (this would work only on chips that
+// have multiple channel index fields instead of a channel mask, but all chips
+// that need that workaround are like that).
+#define ADC_REAL_NUM_CHANNELS (ADC_DUMMY_CONVERSIONS_AT_START + ADC_NUM_CHANNELS)
+
 #ifndef ADC_BUFFER_DEPTH
 #    define ADC_BUFFER_DEPTH 1
 #endif
 
 // For more sampling rate options, look at hal_adc_lld.h in ChibiOS
 #ifndef ADC_SAMPLING_RATE
-#    define ADC_SAMPLING_RATE ADC_SMPR_SMP_1P5
+#    if defined(ADC_SMPR_SMP_1P5)
+#        define ADC_SAMPLING_RATE ADC_SMPR_SMP_1P5
+#    elif defined(ADC_SMPR_SMP_2P5) // STM32L4XX, STM32L4XXP, STM32G4XX, STM32WBXX
+#        define ADC_SAMPLING_RATE ADC_SMPR_SMP_92P5
+#    else
+#        error "Cannot determine the default ADC_SAMPLING_RATE for this MCU."
+#    endif
 #endif
 
 // Options are 12, 10, 8, and 6 bit.
@@ -108,7 +132,7 @@
 #endif
 
 static ADCConfig   adcCfg = {};
-static adcsample_t sampleBuffer[ADC_NUM_CHANNELS * ADC_BUFFER_DEPTH];
+static adcsample_t sampleBuffer[ADC_REAL_NUM_CHANNELS * ADC_BUFFER_DEPTH];
 
 // Initialize to max number of ADCs, set to empty object to initialize all to false.
 static bool adcInitialized[ADC_COUNT] = {};
@@ -116,7 +140,7 @@ static bool adcInitialized[ADC_COUNT] = {};
 // TODO: add back TR handling???
 static ADCConversionGroup adcConversionGroup = {
     .circular     = FALSE,
-    .num_channels = (uint16_t)(ADC_NUM_CHANNELS),
+    .num_channels = (uint16_t)(ADC_REAL_NUM_CHANNELS),
 #if defined(USE_ADCV1)
     .cfgr1 = ADC_CFGR1_CONT | ADC_RESOLUTION,
     .smpr  = ADC_SAMPLING_RATE,
@@ -240,6 +264,8 @@ __attribute__((weak)) adc_mux pinToMux(pin_t pin) {
         case C5:  return TO_MUX( ADC_CHANNEL_IN15, 0 );
         // STM32F103x[C-G] in 144-pin packages also have analog inputs on F6...F10, but they are on ADC3, and the
         // ChibiOS ADC driver for STM32F1xx currently supports only ADC1, therefore these pins are not usable.
+#elif defined(STM32L4XX)
+        case A0:  return TO_MUX( ADC_CHANNEL_IN5,  0 );
 #elif defined(RP2040)
         case 26U: return TO_MUX(0, 0);
         case 27U: return TO_MUX(1, 0);
@@ -306,7 +332,11 @@ int16_t adc_read(adc_mux mux) {
 #elif defined(RP2040)
     adcConversionGroup.channel_mask = 1 << mux.input;
 #else
-    adcConversionGroup.sqr[0] = ADC_SQR1_SQ1_N(mux.input);
+    adcConversionGroup.sqr[0] = ADC_SQR1_SQ1_N(mux.input)
+#    if ADC_DUMMY_CONVERSIONS_AT_START >= 1
+                                | ADC_SQR1_SQ2_N(mux.input)
+#    endif
+        ;
 #endif
 
     ADCDriver* targetDriver = intToADCDriver(mux.adc);
@@ -319,11 +349,21 @@ int16_t adc_read(adc_mux mux) {
         return 0;
     }
 
+    static uint16_t last_print;
+    if (timer_elapsed(last_print) > 10) {
+        last_print = timer_read();
+        uprintf("[ADC]");
+        for (int i = 0; i < ADC_REAL_NUM_CHANNELS; ++i) {
+            uprintf(" %5d", sampleBuffer[i]);
+        }
+        uprintf("\n");
+    }
+
 #if defined(USE_ADCV2) || defined(RP2040)
     // fake 12-bit -> N-bit scale
-    return (*sampleBuffer) >> (12 - ADC_RESOLUTION);
+    return (sampleBuffer[ADC_DUMMY_CONVERSIONS_AT_START]) >> (12 - ADC_RESOLUTION);
 #else
     // already handled as part of adcConvert
-    return *sampleBuffer;
+    return sampleBuffer[ADC_DUMMY_CONVERSIONS_AT_START];
 #endif
 }
