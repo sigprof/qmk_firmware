@@ -33,16 +33,18 @@
 #    error "STM32 ADC Dual Mode is not supported at this time."
 #endif
 
-#if STM32_ADCV3_OVERSAMPLING
+#ifndef ADC_NUM_DUMMY_SAMPLES
+#    if STM32_ADCV3_OVERSAMPLING
 // Apparently all ADCV3 chips that support oversampling (STM32L4xx, STM32L4xx+,
 // STM32G4xx, STM32WB[35]x) have errata like “Wrong ADC result if conversion
 // done late after calibration or previous conversion”; the workaround is to
 // perform a dummy conversion and discard its result.  STM32G4xx chips also
 // have the “ADC channel 0 converted instead of the required ADC channel”
 // errata, one workaround for which is also to perform a dummy conversion.
-#    define ADC_DUMMY_CONVERSIONS_AT_START 1
-#else
-#    define ADC_DUMMY_CONVERSIONS_AT_START 0
+#        define ADC_NUM_DUMMY_SAMPLES 1
+#    else
+#        define ADC_NUM_DUMMY_SAMPLES 0
+#    endif
 #endif
 
 // Otherwise assume V3
@@ -102,13 +104,16 @@
 #    error "The ARM ADC implementation currently only supports reading one channel at a time."
 #endif
 
-// Add dummy conversions as extra channels (this would work only on chips that
-// have multiple channel index fields instead of a channel mask, but all chips
-// that need that workaround are like that).
-#define ADC_REAL_NUM_CHANNELS (ADC_DUMMY_CONVERSIONS_AT_START + ADC_NUM_CHANNELS)
-
 #ifndef ADC_BUFFER_DEPTH
-#    define ADC_BUFFER_DEPTH 1
+#    if ADC_NUM_DUMMY_SAMPLES == 0
+#        define ADC_BUFFER_DEPTH 1
+#    else
+#        define ADC_BUFFER_DEPTH (((ADC_NUM_DUMMY_SAMPLES + 2) / 2) * 2)
+#    endif
+#elif ADC_BUFFER_DEPTH <= ADC_NUM_DUMMY_SAMPLES
+#    error "ADC_BUFFER_DEPTH must be larger than ADC_NUM_DUMMY_SAMPLES"
+#elif (ADC_BUFFER_DEPTH != 1) && ((ADC_BUFFER_DEPTH % 2) != 0)
+#    error "ADC_BUFFER_DEPTH must be either 1 or an even number"
 #endif
 
 // For more sampling rate options, look at hal_adc_lld.h in ChibiOS
@@ -132,7 +137,7 @@
 #endif
 
 static ADCConfig   adcCfg = {};
-static adcsample_t sampleBuffer[ADC_REAL_NUM_CHANNELS * ADC_BUFFER_DEPTH];
+static adcsample_t sampleBuffer[ADC_NUM_CHANNELS * ADC_BUFFER_DEPTH];
 
 // Initialize to max number of ADCs, set to empty object to initialize all to false.
 static bool adcInitialized[ADC_COUNT] = {};
@@ -140,7 +145,7 @@ static bool adcInitialized[ADC_COUNT] = {};
 // TODO: add back TR handling???
 static ADCConversionGroup adcConversionGroup = {
     .circular     = FALSE,
-    .num_channels = (uint16_t)(ADC_REAL_NUM_CHANNELS),
+    .num_channels = (uint16_t)(ADC_NUM_CHANNELS),
 #if defined(USE_ADCV1)
     .cfgr1 = ADC_CFGR1_CONT | ADC_RESOLUTION,
     .smpr  = ADC_SAMPLING_RATE,
@@ -332,11 +337,7 @@ int16_t adc_read(adc_mux mux) {
 #elif defined(RP2040)
     adcConversionGroup.channel_mask = 1 << mux.input;
 #else
-    adcConversionGroup.sqr[0] = ADC_SQR1_SQ1_N(mux.input)
-#    if ADC_DUMMY_CONVERSIONS_AT_START >= 1
-                                | ADC_SQR1_SQ2_N(mux.input)
-#    endif
-        ;
+    adcConversionGroup.sqr[0] = ADC_SQR1_SQ1_N(mux.input);
 #endif
 
     ADCDriver* targetDriver = intToADCDriver(mux.adc);
@@ -353,7 +354,7 @@ int16_t adc_read(adc_mux mux) {
     if (timer_elapsed(last_print) > 10) {
         last_print = timer_read();
         uprintf("[ADC]");
-        for (int i = 0; i < ADC_REAL_NUM_CHANNELS; ++i) {
+        for (int i = 0; i < ADC_BUFFER_DEPTH * ADC_NUM_CHANNELS; ++i) {
             uprintf(" %5d", sampleBuffer[i]);
         }
         uprintf("\n");
@@ -361,9 +362,9 @@ int16_t adc_read(adc_mux mux) {
 
 #if defined(USE_ADCV2) || defined(RP2040)
     // fake 12-bit -> N-bit scale
-    return (sampleBuffer[ADC_DUMMY_CONVERSIONS_AT_START]) >> (12 - ADC_RESOLUTION);
+    return (sampleBuffer[ADC_NUM_DUMMY_SAMPLES * ADC_NUM_CHANNELS]) >> (12 - ADC_RESOLUTION);
 #else
     // already handled as part of adcConvert
-    return sampleBuffer[ADC_DUMMY_CONVERSIONS_AT_START];
+    return sampleBuffer[ADC_NUM_DUMMY_SAMPLES * ADC_NUM_CHANNELS];
 #endif
 }
