@@ -3,8 +3,8 @@
     "processor": "STM32F072",
     "bootloader": "stm32-dfu",
     "matrix_pins": {
-        "cols": ["B4"],
-        "rows": ["B5"]
+        "cols": ["C14"],
+        "rows": ["C15"]
     },
     "backlight": {
         "pin": "C8"
