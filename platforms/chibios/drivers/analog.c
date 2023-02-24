@@ -18,8 +18,8 @@
 #include <ch.h>
 #include <hal.h>
 
-#include <print.h>
-#include <timer.h>
+#include "print.h"
+#include "timer.h"
 
 #if !HAL_USE_ADC
 #    error "You need to set HAL_USE_ADC to TRUE in your halconf.h to use the ADC."
