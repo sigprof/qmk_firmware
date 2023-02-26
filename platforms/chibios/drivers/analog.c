@@ -272,7 +272,32 @@ __attribute__((weak)) adc_mux pinToMux(pin_t pin) {
         // STM32F103x[C-G] in 144-pin packages also have analog inputs on F6...F10, but they are on ADC3, and the
         // ChibiOS ADC driver for STM32F1xx currently supports only ADC1, therefore these pins are not usable.
 #elif defined(STM32L4XX)
-        case A0:  return TO_MUX( ADC_CHANNEL_IN5,  0 );
+        case A0:  return TO_MUX( ADC_CHANNEL_IN5,  0 ); // Can also be ADC2
+        case A1:  return TO_MUX( ADC_CHANNEL_IN6,  0 ); // Can also be ADC2
+        case A2:  return TO_MUX( ADC_CHANNEL_IN7,  0 ); // Can also be ADC2
+        case A3:  return TO_MUX( ADC_CHANNEL_IN8,  0 ); // Can also be ADC2
+        case A4:  return TO_MUX( ADC_CHANNEL_IN9,  0 ); // Can also be ADC2
+        case A5:  return TO_MUX( ADC_CHANNEL_IN10, 0 ); // Can also be ADC2
+        case A6:  return TO_MUX( ADC_CHANNEL_IN11, 0 ); // Can also be ADC2
+        case A7:  return TO_MUX( ADC_CHANNEL_IN12, 0 ); // Can also be ADC2
+        case B0:  return TO_MUX( ADC_CHANNEL_IN15, 0 ); // Can also be ADC2
+        case B1:  return TO_MUX( ADC_CHANNEL_IN16, 0 ); // Can also be ADC2
+        case C0:  return TO_MUX( ADC_CHANNEL_IN1,  0 ); // Can also be ADC2 or ADC3
+        case C1:  return TO_MUX( ADC_CHANNEL_IN2,  0 ); // Can also be ADC2 or ADC3
+        case C2:  return TO_MUX( ADC_CHANNEL_IN3,  0 ); // Can also be ADC2 or ADC3
+        case C3:  return TO_MUX( ADC_CHANNEL_IN4,  0 ); // Can also be ADC2 or ADC3
+        case C4:  return TO_MUX( ADC_CHANNEL_IN13, 0 ); // Can also be ADC2
+        case C5:  return TO_MUX( ADC_CHANNEL_IN14, 0 ); // Can also be ADC2
+#    if STM32_HAS_GPIOF && STM32_ADC_USE_ADC3
+        case F3:  return TO_MUX( ADC_CHANNEL_IN6,  2 );
+        case F4:  return TO_MUX( ADC_CHANNEL_IN7,  2 );
+        case F5:  return TO_MUX( ADC_CHANNEL_IN8,  2 );
+        case F6:  return TO_MUX( ADC_CHANNEL_IN9,  2 );
+        case F7:  return TO_MUX( ADC_CHANNEL_IN10, 2 );
+        case F8:  return TO_MUX( ADC_CHANNEL_IN11, 2 );
+        case F9:  return TO_MUX( ADC_CHANNEL_IN12, 2 );
+        case F10: return TO_MUX( ADC_CHANNEL_IN13, 2 );
+#    endif
 #elif defined(RP2040)
         case 26U: return TO_MUX(0, 0);
         case 27U: return TO_MUX(1, 0);
