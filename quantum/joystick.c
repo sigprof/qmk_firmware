@@ -61,6 +61,7 @@ void unregister_joystick_button(uint8_t button) {
 int16_t joystick_read_axis(uint8_t axis) {
     if (axis >= JOYSTICK_AXIS_COUNT) return 0;
 
+#if defined(JOYSTICK_SHARED_INPUT_PINS)
     // disable pull-up resistor
     writePinLow(joystick_axes[axis].input_pin);
 
@@ -69,6 +70,7 @@ int16_t joystick_read_axis(uint8_t axis) {
     setPinOutput(joystick_axes[axis].input_pin);
 
     wait_us(10);
+#endif
 
     if (joystick_axes[axis].output_pin != JS_VIRTUAL_AXIS) {
         setPinOutput(joystick_axes[axis].output_pin);
@@ -82,9 +84,11 @@ int16_t joystick_read_axis(uint8_t axis) {
 
     wait_us(10);
 
+#if defined(JOYSTICK_SHARED_INPUT_PINS) || defined(__AVR__)
     setPinInput(joystick_axes[axis].input_pin);
 
     wait_us(10);
+#endif
 
 #if defined(ANALOG_JOYSTICK_ENABLE) && (defined(__AVR__) || defined(PROTOCOL_CHIBIOS))
     int16_t axis_val = analogReadPin(joystick_axes[axis].input_pin);
