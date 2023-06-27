@@ -369,7 +369,9 @@ void process_action(keyrecord_t *record, action_t action) {
 #endif
 
 #ifndef NO_ACTION_ONESHOT
+#    if defined(STRICT_LAYER_RELEASE) || defined(LEGACY_OSL_RELEASE)
     bool do_release_oneshot = false;
+#    endif
     // notice we only clear the one shot layer if the pressed key is not a modifier.
     if (is_oneshot_layer_active() && event.pressed &&
         (action.kind.id == ACT_USAGE || !(IS_MODIFIER_KEYCODE(action.key.code)
@@ -382,7 +384,9 @@ void process_action(keyrecord_t *record, action_t action) {
 #    endif
         && keymap_config.oneshot_enable) {
         clear_oneshot_layer_state(ONESHOT_OTHER_KEY_PRESSED);
+#    if defined(STRICT_LAYER_RELEASE) || defined(LEGACY_OSL_RELEASE)
         do_release_oneshot = !is_oneshot_layer_active();
+#    endif
     }
 #endif
 
@@ -644,7 +648,9 @@ void process_action(keyrecord_t *record, action_t action) {
                         }
                     } else {
 #        if defined(ONESHOT_TAP_TOGGLE) && ONESHOT_TAP_TOGGLE > 1
+#            if defined(STRICT_LAYER_RELEASE) || defined(LEGACY_OSL_RELEASE)
                         do_release_oneshot = false;
+#            endif
                         if (event.pressed) {
                             if (get_oneshot_layer_state() == ONESHOT_TOGGLED) {
                                 reset_oneshot_layer();
@@ -858,6 +864,7 @@ void process_action(keyrecord_t *record, action_t action) {
 #endif
 
 #ifndef NO_ACTION_ONESHOT
+#    if defined(STRICT_LAYER_RELEASE) || defined(LEGACY_OSL_RELEASE)
     /* Because we switch layers after a oneshot event, we need to release the
      * key before we leave the layer or no key up event will be generated.
      */
@@ -867,6 +874,7 @@ void process_action(keyrecord_t *record, action_t action) {
         process_record(record);
         layer_off(get_oneshot_layer());
     }
+#    endif
 #endif
 }
 
