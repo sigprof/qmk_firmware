@@ -15,6 +15,8 @@
  */
 #include QMK_KEYBOARD_H
 
+#include "sigprof.h"
+
 enum layer_names {
     _QWERTY,
     _NUMPAD,
@@ -26,12 +28,16 @@ enum layer_names {
 enum tap_dance_ids {
     TD_RALT,
     TD_RCTL,
+    TD_LSFT,
+    TD_RSFT,
 };
 
 #define U_FCAPS LT(_FN, KC_CAPS)
 #define U_FAPP  LT(_FN, KC_APP)
 #define U_TRALT TD(TD_RALT)
 #define U_TRCTL TD(TD_RCTL)
+#define U_TLSFT TD(TD_LSFT)
+#define U_TRSFT TD(TD_RSFT)
 #define U_NBSLS LT(_NUMPAD, KC_BSLS)
 #define U_MOADJ OSL(_ADJUST) //MO(_ADJUST)
 #define U_TGNUM TG(_NUMPAD)
@@ -69,7 +75,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * ├─────┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴─────┤└───┘
      * │CapsFn│ A │ S │ D │ F │ G │ H │ J │ K │ L │ ; │ ' │  Enter │
      * ├──────┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴────┬───┘
-     * │ Shift  │ Z │ X │ C │ V │ B │ N │ M │ , │ . │ / │ Shift│┌───┐
+     * │ ShiftL │ Z │ X │ C │ V │ B │ N │ M │ , │ . │ / │ShiftL│┌───┐
      * ├────┬───┴┬──┴─┬─┴───┴───┴───┴───┴───┴──┬┴───┴┬──┴──┬───┘│ ↑ │
      * │Ctrl│GUI │Alt │                        │TRAlt│TRCtl│┌───┼───┼───┐
      * └────┴────┴────┴────────────────────────┴─────┴─────┘│ ← │ ↓ │ → │
@@ -81,7 +87,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_GRV,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  KC_BSPC,            KC_PGUP,
         KC_TAB,      KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, U_NBSLS,        KC_PGDN,
         U_FCAPS,       KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT, KC_ENT,
-        KC_LSFT,            KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,          KC_UP,
+        U_TLSFT,            KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, U_TRSFT,          KC_UP,
         KC_LCTL,   KC_LGUI,   KC_LALT,                       KC_SPC,                              U_TRALT,     U_TRCTL,        KC_LEFT, KC_DOWN, KC_RGHT
     ),
 
@@ -144,7 +150,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      */
     [_ADJUST] = LAYOUT_ansi(
         QK_BOOT,   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,   XXXXXXX, NK_OFF,  NK_ON,   DB_TOGG,    XXXXXXX,   XXXXXXX,
-        XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, NK_TOGG, EE_CLR,             XXXXXXX,
+        XXXXXXX, U_LSWM0, U_LSWM1, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, NK_TOGG, EE_CLR,             XXXXXXX,
         XXXXXXX,     BL_TOGG, BL_DOWN, BL_UP,   BL_BRTG, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,        XXXXXXX,
         _______,       RGB_TOG, RGB_MOD, RGB_HUI, RGB_SAI, RGB_VAI, RGB_SPI, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
         _______,            RGB_M_P, RGB_RMOD,RGB_HUD, RGB_SAD, RGB_VAD, RGB_SPD, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, _______,          XXXXXXX,
@@ -178,7 +184,7 @@ static void update_indicators(void) {
     }
 }
 
-void keyboard_post_init_user(void) {
+void keyboard_post_init_keymap(void) {
     rgblight_layers = my_rgb_layers;
     rgblight_set_effect_range(0, 16);
     update_indicators();
@@ -382,6 +388,8 @@ static void td_rctl_reset(tap_dance_state_t *state, void *user_data) {
 tap_dance_action_t tap_dance_actions[] = {
     [TD_RALT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, td_ralt_finished, td_ralt_reset),
     [TD_RCTL] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, td_rctl_finished, td_rctl_reset),
+    [TD_LSFT] = ACTION_LANG_SWITCH_LSFT,
+    [TD_RSFT] = ACTION_LANG_SWITCH_RSFT,
 };
 
 void eeconfig_init_user(void) {
