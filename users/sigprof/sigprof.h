@@ -29,6 +29,7 @@ bool process_record_keymap(uint16_t keycode, keyrecord_t *record);
 
 enum user_keycodes {
     DUMMY_USER_KEYCODE = QK_USER - 1,
+    U_BTN1R, // Repeat `KC_BTN1` taps while the key is held down
 #ifdef CUSTOM_LANG_SWITCH_ENABLE
     U_LSWM0, // Set language switch mode 0 (Caps Lock)
     U_LSWM1, // Set language switch mode 1 (Ctrl+F15)
