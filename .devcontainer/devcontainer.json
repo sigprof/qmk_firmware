@@ -10,7 +10,8 @@
 				"amodio.toggle-excluded-files"
 			]
 		}
-	}
+	},
+	"postCreateCommand": "git submodule update --init"
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
