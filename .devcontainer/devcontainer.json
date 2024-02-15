@@ -3,7 +3,14 @@
 {
 	"name": "QMK CLI",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "ghcr.io/qmk/qmk_cli"
+	"image": "ghcr.io/qmk/qmk_cli",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"amodio.toggle-excluded-files"
+			]
+		}
+	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
