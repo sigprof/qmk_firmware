@@ -170,6 +170,7 @@ define handle_quantum_painter_driver
             $(DRIVER_PATH)/painter/oled_panel \
             $(DRIVER_PATH)/painter/sh1106
         SRC += \
+            $(DRIVER_PATH)/painter/generic/qp_surface_backed_driver.c \
             $(DRIVER_PATH)/painter/oled_panel/qp_oled_panel.c \
             $(DRIVER_PATH)/painter/sh1106/qp_sh1106.c
 
@@ -181,6 +182,7 @@ define handle_quantum_painter_driver
             $(DRIVER_PATH)/painter/oled_panel \
             $(DRIVER_PATH)/painter/sh1106
         SRC += \
+            $(DRIVER_PATH)/painter/generic/qp_surface_backed_driver.c \
             $(DRIVER_PATH)/painter/oled_panel/qp_oled_panel.c \
             $(DRIVER_PATH)/painter/sh1106/qp_sh1106.c
 
