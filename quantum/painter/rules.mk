@@ -11,6 +11,8 @@ VALID_QUANTUM_PAINTER_DRIVERS := \
     ili9341_spi \
     ili9486_spi \
     ili9488_spi \
+    st7567s_i2c \
+    st7567s_spi \
     st7735_spi \
     st7789_spi \
     gc9a01_spi \
@@ -105,6 +107,31 @@ define handle_quantum_painter_driver
         SRC += \
             $(DRIVER_PATH)/painter/tft_panel/qp_tft_panel.c \
             $(DRIVER_PATH)/painter/ili9xxx/qp_ili9488.c \
+
+    else ifeq ($$(strip $$(CURRENT_PAINTER_DRIVER)),st7567s_spi)
+        QUANTUM_PAINTER_NEEDS_SURFACE := yes
+        QUANTUM_PAINTER_NEEDS_COMMS_SPI := yes
+        QUANTUM_PAINTER_NEEDS_COMMS_SPI_DC_RESET := yes
+        OPT_DEFS += -DQUANTUM_PAINTER_ST7567S_ENABLE -DQUANTUM_PAINTER_ST7567S_SPI_ENABLE
+        COMMON_VPATH += \
+            $(DRIVER_PATH)/painter/oled_panel \
+            $(DRIVER_PATH)/painter/st75xx
+        SRC += \
+            $(DRIVER_PATH)/painter/oled_panel/qp_oled_panel.c \
+            $(DRIVER_PATH)/painter/st75xx/qp_st75xx.c \
+            $(DRIVER_PATH)/painter/st75xx/qp_st7567s.c
+
+    else ifeq ($$(strip $$(CURRENT_PAINTER_DRIVER)),st7567s_i2c)
+        QUANTUM_PAINTER_NEEDS_SURFACE := yes
+        QUANTUM_PAINTER_NEEDS_COMMS_I2C := yes
+        OPT_DEFS += -DQUANTUM_PAINTER_ST7567S_ENABLE -DQUANTUM_PAINTER_ST7567S_I2C_ENABLE
+        COMMON_VPATH += \
+            $(DRIVER_PATH)/painter/oled_panel \
+            $(DRIVER_PATH)/painter/st75xx
+        SRC += \
+            $(DRIVER_PATH)/painter/oled_panel/qp_oled_panel.c \
+            $(DRIVER_PATH)/painter/st75xx/qp_st75xx.c \
+            $(DRIVER_PATH)/painter/st75xx/qp_st7567s.c
 
     else ifeq ($$(strip $$(CURRENT_PAINTER_DRIVER)),st7735_spi)
         QUANTUM_PAINTER_NEEDS_COMMS_SPI := yes
