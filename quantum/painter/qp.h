@@ -521,6 +521,12 @@ int16_t qp_drawtext_recolor(painter_device_t device, uint16_t x, uint16_t y, pai
 #    define ILI9488_NUM_DEVICES 0
 #endif // QUANTUM_PAINTER_ILI9488_ENABLE
 
+#ifdef QUANTUM_PAINTER_ST7567S_ENABLE
+#    include "qp_st7567s.h"
+#else // QUANTUM_PAINTER_ST7567S_ENABLE
+#    define ST7567S_NUM_DEVICES 0
+#endif // QUANTUM_PAINTER_ST7567S_ENABLE
+
 #ifdef QUANTUM_PAINTER_ST7789_ENABLE
 #    include "qp_st7789.h"
 #else // QUANTUM_PAINTER_ST7789_ENABLE
