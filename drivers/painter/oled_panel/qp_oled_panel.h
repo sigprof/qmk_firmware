@@ -34,7 +34,11 @@ typedef struct oled_panel_painter_driver_vtable_t {
 
 // Device definition
 typedef struct oled_panel_painter_device_t {
-    surface_backed_painter_driver_t sbp; // must be first, so it can be cast to/from the painter_device_t* type
+    // must be first, so it can be cast to/from the painter_device_t* type
+    union {
+        surface_backed_painter_driver_t sbp;
+        painter_driver_t                base;
+    };
 
     union {
 #ifdef QUANTUM_PAINTER_SPI_ENABLE

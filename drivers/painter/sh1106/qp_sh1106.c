@@ -30,11 +30,11 @@ __attribute__((weak)) bool qp_sh1106_init(painter_device_t device, painter_rotat
 
     // Change the surface geometry based on the panel rotation
     if (rotation == QP_ROTATION_90 || rotation == QP_ROTATION_270) {
-        driver->oled.sbp.surface.base.panel_width  = driver->oled.sbp.base.panel_height;
-        driver->oled.sbp.surface.base.panel_height = driver->oled.sbp.base.panel_width;
+        driver->oled.sbp.surface.base.panel_width  = driver->oled.base.panel_height;
+        driver->oled.sbp.surface.base.panel_height = driver->oled.base.panel_width;
     } else {
-        driver->oled.sbp.surface.base.panel_width  = driver->oled.sbp.base.panel_width;
-        driver->oled.sbp.surface.base.panel_height = driver->oled.sbp.base.panel_height;
+        driver->oled.sbp.surface.base.panel_width  = driver->oled.base.panel_width;
+        driver->oled.sbp.surface.base.panel_height = driver->oled.base.panel_height;
     }
 
     // Init the internal surface
@@ -62,12 +62,12 @@ __attribute__((weak)) bool qp_sh1106_init(painter_device_t device, painter_rotat
     // clang-format on
 
     // If the display height is anything other than the default 64 pixels, change SH1106_SET_MUX_RATIO data byte to the correct value
-    if (driver->oled.sbp.base.panel_height != 64) {
-        sh1106_init_sequence[3] = driver->oled.sbp.base.panel_height - 1;
+    if (driver->oled.base.panel_height != 64) {
+        sh1106_init_sequence[3] = driver->oled.base.panel_height - 1;
     }
 
     // For 128x32 or 96x16 displays, change SH1106_COM_PADS_HW_CFG data byte from alternative (0x12) to sequential (0x02) configuration
-    if (driver->oled.sbp.base.panel_height <= 32) {
+    if (driver->oled.base.panel_height <= 32) {
         sh1106_init_sequence[20] = 0x02;
     }
 
@@ -83,7 +83,7 @@ bool qp_sh1106_flush(painter_device_t device) {
         return true;
     }
 
-    switch (driver->oled.sbp.base.rotation) {
+    switch (driver->oled.base.rotation) {
         default:
         case QP_ROTATION_0:
             qp_oled_panel_page_column_flush_rot0(device, &driver->oled.sbp.surface.dirty, driver->framebuffer);
@@ -140,24 +140,24 @@ const oled_panel_painter_driver_vtable_t sh1106_driver_vtable = {
 painter_device_t qp_sh1106_make_spi_device(uint16_t panel_width, uint16_t panel_height, pin_t chip_select_pin, pin_t dc_pin, pin_t reset_pin, uint16_t spi_divisor, int spi_mode) {
     for (uint32_t i = 0; i < SH1106_NUM_DEVICES; ++i) {
         sh1106_device_t *driver = &sh1106_drivers[i];
-        if (!driver->oled.sbp.base.driver_vtable) {
+        if (!driver->oled.base.driver_vtable) {
             painter_device_t surface = qp_make_mono1bpp_surface_advanced(&driver->oled.sbp.surface, 1, panel_width, panel_height, driver->framebuffer);
             if (!surface) {
                 return NULL;
             }
 
             // Setup the OLED device
-            driver->oled.sbp.base.driver_vtable         = (const painter_driver_vtable_t *)&sh1106_driver_vtable;
-            driver->oled.sbp.base.comms_vtable          = (const painter_comms_vtable_t *)&spi_comms_with_dc_vtable;
-            driver->oled.sbp.base.native_bits_per_pixel = 1; // 1bpp mono
-            driver->oled.sbp.base.panel_width           = panel_width;
-            driver->oled.sbp.base.panel_height          = panel_height;
-            driver->oled.sbp.base.rotation              = QP_ROTATION_0;
-            driver->oled.sbp.base.offset_x              = 0;
-            driver->oled.sbp.base.offset_y              = 0;
+            driver->oled.base.driver_vtable         = (const painter_driver_vtable_t *)&sh1106_driver_vtable;
+            driver->oled.base.comms_vtable          = (const painter_comms_vtable_t *)&spi_comms_with_dc_vtable;
+            driver->oled.base.native_bits_per_pixel = 1; // 1bpp mono
+            driver->oled.base.panel_width           = panel_width;
+            driver->oled.base.panel_height          = panel_height;
+            driver->oled.base.rotation              = QP_ROTATION_0;
+            driver->oled.base.offset_x              = 0;
+            driver->oled.base.offset_y              = 0;
 
             // SPI and other pin configuration
-            driver->oled.sbp.base.comms_config                               = &driver->oled.spi_dc_reset_config;
+            driver->oled.base.comms_config                                   = &driver->oled.spi_dc_reset_config;
             driver->oled.spi_dc_reset_config.spi_config.chip_select_pin      = chip_select_pin;
             driver->oled.spi_dc_reset_config.spi_config.divisor              = spi_divisor;
             driver->oled.spi_dc_reset_config.spi_config.lsb_first            = false;
@@ -184,7 +184,7 @@ painter_device_t qp_sh1106_make_spi_device(uint16_t panel_width, uint16_t panel_
 painter_device_t qp_sh1106_make_i2c_device(uint16_t panel_width, uint16_t panel_height, uint8_t i2c_address) {
     for (uint32_t i = 0; i < SH1106_NUM_DEVICES; ++i) {
         sh1106_device_t *driver = &sh1106_drivers[i];
-        if (!driver->oled.sbp.base.driver_vtable) {
+        if (!driver->oled.base.driver_vtable) {
             // Instantiate the surface, intentional swap of width/high due to transpose
             painter_device_t surface = qp_make_mono1bpp_surface_advanced(&driver->oled.sbp.surface, 1, panel_width, panel_height, driver->framebuffer);
             if (!surface) {
@@ -192,17 +192,17 @@ painter_device_t qp_sh1106_make_i2c_device(uint16_t panel_width, uint16_t panel_
             }
 
             // Setup the OLED device
-            driver->oled.sbp.base.driver_vtable         = (const painter_driver_vtable_t *)&sh1106_driver_vtable;
-            driver->oled.sbp.base.comms_vtable          = (const painter_comms_vtable_t *)&i2c_comms_cmddata_vtable;
-            driver->oled.sbp.base.native_bits_per_pixel = 1; // 1bpp mono
-            driver->oled.sbp.base.panel_width           = panel_width;
-            driver->oled.sbp.base.panel_height          = panel_height;
-            driver->oled.sbp.base.rotation              = QP_ROTATION_0;
-            driver->oled.sbp.base.offset_x              = 0;
-            driver->oled.sbp.base.offset_y              = 0;
+            driver->oled.base.driver_vtable         = (const painter_driver_vtable_t *)&sh1106_driver_vtable;
+            driver->oled.base.comms_vtable          = (const painter_comms_vtable_t *)&i2c_comms_cmddata_vtable;
+            driver->oled.base.native_bits_per_pixel = 1; // 1bpp mono
+            driver->oled.base.panel_width           = panel_width;
+            driver->oled.base.panel_height          = panel_height;
+            driver->oled.base.rotation              = QP_ROTATION_0;
+            driver->oled.base.offset_x              = 0;
+            driver->oled.base.offset_y              = 0;
 
             // I2C configuration
-            driver->oled.sbp.base.comms_config   = &driver->oled.i2c_config;
+            driver->oled.base.comms_config       = &driver->oled.i2c_config;
             driver->oled.i2c_config.chip_address = i2c_address;
 
             if (!qp_internal_register_device((painter_device_t)driver)) {
