@@ -13,6 +13,7 @@ enum {
                      + (ILI9341_NUM_DEVICES) // ILI9341
                      + (ILI9486_NUM_DEVICES) // ILI9486
                      + (ILI9488_NUM_DEVICES) // ILI9488
+                     + (ST7567S_NUM_DEVICES) // ST7567S
                      + (ST7789_NUM_DEVICES)  // ST7789
                      + (ST7735_NUM_DEVICES)  // ST7735
                      + (GC9A01_NUM_DEVICES)  // GC9A01
