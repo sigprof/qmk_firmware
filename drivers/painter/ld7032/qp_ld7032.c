@@ -158,7 +158,7 @@ void ld7032_flush_90(painter_device_t device, surface_dirty_data_t *dirty, const
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 typedef struct ld7032_device_t {
-    surface_backed_painter_driver_t oled;
+    surface_backed_painter_driver_t sbp;
 
     union {
 #ifdef QUANTUM_PAINTER_SPI_ENABLE
@@ -185,15 +185,15 @@ __attribute__((weak)) bool qp_ld7032_init(painter_device_t device, painter_rotat
 
     // Change the surface geometry based on the panel rotation
     if (rotation == QP_ROTATION_90 || rotation == QP_ROTATION_270) {
-        driver->oled.surface.base.panel_width  = driver->oled.base.panel_height;
-        driver->oled.surface.base.panel_height = driver->oled.base.panel_width;
+        driver->sbp.surface.base.panel_width  = driver->sbp.base.panel_height;
+        driver->sbp.surface.base.panel_height = driver->sbp.base.panel_width;
     } else {
-        driver->oled.surface.base.panel_width  = driver->oled.base.panel_width;
-        driver->oled.surface.base.panel_height = driver->oled.base.panel_height;
+        driver->sbp.surface.base.panel_width  = driver->sbp.base.panel_width;
+        driver->sbp.surface.base.panel_height = driver->sbp.base.panel_height;
     }
 
     // Init the internal surface
-    if (!qp_init(&driver->oled.surface.base, QP_ROTATION_0)) {
+    if (!qp_init(&driver->sbp.surface.base, QP_ROTATION_0)) {
         qp_dprintf("Failed to init internal surface in qp_ld7032_init\n");
         return false;
     }
@@ -216,8 +216,8 @@ __attribute__((weak)) bool qp_ld7032_init(painter_device_t device, painter_rotat
 
     qp_comms_bulk_command_sequence(device, ld7032_init_sequence, sizeof(ld7032_init_sequence));
 
-    uint8_t display_y_start = 40 - driver->oled.base.panel_height;
-    uint8_t display_x_start = (128 - driver->oled.base.panel_width) / 2;
+    uint8_t display_y_start = 40 - driver->sbp.base.panel_height;
+    uint8_t display_x_start = (128 - driver->sbp.base.panel_width) / 2;
 
     // clang-format off
     uint8_t ld7032_memory_setup[] = {
@@ -230,11 +230,11 @@ __attribute__((weak)) bool qp_ld7032_init(painter_device_t device, painter_rotat
     // clang-format on
 
     ld7032_memory_setup[3]  = display_x_start;
-    ld7032_memory_setup[4]  = display_x_start + driver->oled.base.panel_width - 1;
+    ld7032_memory_setup[4]  = display_x_start + driver->sbp.base.panel_width - 1;
     ld7032_memory_setup[8]  = display_y_start;
-    ld7032_memory_setup[9]  = display_y_start + driver->oled.base.panel_height - 1;
+    ld7032_memory_setup[9]  = display_y_start + driver->sbp.base.panel_height - 1;
     ld7032_memory_setup[13] = ld7032_memory_setup[4] + 1;
-    ld7032_memory_setup[17] = driver->oled.base.panel_height;
+    ld7032_memory_setup[17] = driver->sbp.base.panel_height;
 
     qp_comms_bulk_command_sequence(device, ld7032_memory_setup, sizeof(ld7032_memory_setup));
 
@@ -269,28 +269,28 @@ __attribute__((weak)) bool qp_ld7032_init(painter_device_t device, painter_rotat
 bool qp_ld7032_flush(painter_device_t device) {
     ld7032_device_t *driver = (ld7032_device_t *)device;
 
-    if (!driver->oled.surface.dirty.is_dirty) {
+    if (!driver->sbp.surface.dirty.is_dirty) {
         return true;
     }
 
-    switch (driver->oled.base.rotation) {
+    switch (driver->sbp.base.rotation) {
         default:
         case QP_ROTATION_0:
-            ld7032_flush_0(device, &driver->oled.surface.dirty, driver->framebuffer, false);
+            ld7032_flush_0(device, &driver->sbp.surface.dirty, driver->framebuffer, false);
             break;
         case QP_ROTATION_180:
-            ld7032_flush_0(device, &driver->oled.surface.dirty, driver->framebuffer, true);
+            ld7032_flush_0(device, &driver->sbp.surface.dirty, driver->framebuffer, true);
             break;
         case QP_ROTATION_90:
-            ld7032_flush_90(device, &driver->oled.surface.dirty, driver->framebuffer, false);
+            ld7032_flush_90(device, &driver->sbp.surface.dirty, driver->framebuffer, false);
             break;
         case QP_ROTATION_270:
-            ld7032_flush_90(device, &driver->oled.surface.dirty, driver->framebuffer, true);
+            ld7032_flush_90(device, &driver->sbp.surface.dirty, driver->framebuffer, true);
             break;
     }
 
     // Clear the dirty area
-    qp_flush(&driver->oled.surface);
+    qp_flush(&driver->sbp.surface);
 
     return true;
 }
@@ -331,24 +331,24 @@ const ld7032_comms_with_command_vtable_t ld7032_spi_comms_vtable = {
 painter_device_t qp_ld7032_make_spi_device(uint16_t panel_width, uint16_t panel_height, pin_t chip_select_pin, pin_t dc_pin, pin_t reset_pin, uint16_t spi_divisor, int spi_mode) {
     for (uint32_t i = 0; i < LD7032_NUM_DEVICES; ++i) {
         ld7032_device_t *driver = &ld7032_drivers[i];
-        if (!driver->oled.base.driver_vtable) {
-            painter_device_t surface = qp_make_mono1bpp_surface_advanced(&driver->oled.surface, 1, panel_width, panel_height, driver->framebuffer);
+        if (!driver->sbp.base.driver_vtable) {
+            painter_device_t surface = qp_make_mono1bpp_surface_advanced(&driver->sbp.surface, 1, panel_width, panel_height, driver->framebuffer);
             if (!surface) {
                 return NULL;
             }
 
             // Setup the OLED device
-            driver->oled.base.driver_vtable         = (const painter_driver_vtable_t *)&ld7032_driver_vtable;
-            driver->oled.base.comms_vtable          = (const painter_comms_vtable_t *)&ld7032_spi_comms_vtable;
-            driver->oled.base.native_bits_per_pixel = 1; // 1bpp mono
-            driver->oled.base.panel_width           = panel_width;
-            driver->oled.base.panel_height          = panel_height;
-            driver->oled.base.rotation              = QP_ROTATION_0;
-            driver->oled.base.offset_x              = 0;
-            driver->oled.base.offset_y              = 0;
+            driver->sbp.base.driver_vtable         = (const painter_driver_vtable_t *)&ld7032_driver_vtable;
+            driver->sbp.base.comms_vtable          = (const painter_comms_vtable_t *)&ld7032_spi_comms_vtable;
+            driver->sbp.base.native_bits_per_pixel = 1; // 1bpp mono
+            driver->sbp.base.panel_width           = panel_width;
+            driver->sbp.base.panel_height          = panel_height;
+            driver->sbp.base.rotation              = QP_ROTATION_0;
+            driver->sbp.base.offset_x              = 0;
+            driver->sbp.base.offset_y              = 0;
 
             // SPI and other pin configuration
-            driver->oled.base.comms_config                              = &driver->spi_dc_reset_config;
+            driver->sbp.base.comms_config                               = &driver->spi_dc_reset_config;
             driver->spi_dc_reset_config.spi_config.chip_select_pin      = chip_select_pin;
             driver->spi_dc_reset_config.spi_config.divisor              = spi_divisor;
             driver->spi_dc_reset_config.spi_config.lsb_first            = false;
@@ -390,24 +390,24 @@ const ld7032_comms_with_command_vtable_t ld7032_i2c_comms_vtable = {
 painter_device_t qp_ld7032_make_i2c_device(uint16_t panel_width, uint16_t panel_height, uint8_t i2c_address) {
     for (uint32_t i = 0; i < LD7032_NUM_DEVICES; ++i) {
         ld7032_device_t *driver = &ld7032_drivers[i];
-        if (!driver->oled.base.driver_vtable) {
-            painter_device_t surface = qp_make_mono1bpp_surface_advanced(&driver->oled.surface, 1, panel_width, panel_height, driver->framebuffer);
+        if (!driver->sbp.base.driver_vtable) {
+            painter_device_t surface = qp_make_mono1bpp_surface_advanced(&driver->sbp.surface, 1, panel_width, panel_height, driver->framebuffer);
             if (!surface) {
                 return NULL;
             }
 
             // Setup the OLED device
-            driver->oled.base.driver_vtable         = (const painter_driver_vtable_t *)&ld7032_driver_vtable;
-            driver->oled.base.comms_vtable          = (const painter_comms_vtable_t *)&ld7032_i2c_comms_vtable;
-            driver->oled.base.native_bits_per_pixel = 1; // 1bpp mono
-            driver->oled.base.panel_width           = panel_width;
-            driver->oled.base.panel_height          = panel_height;
-            driver->oled.base.rotation              = QP_ROTATION_0;
-            driver->oled.base.offset_x              = 0;
-            driver->oled.base.offset_y              = 0;
+            driver->sbp.base.driver_vtable         = (const painter_driver_vtable_t *)&ld7032_driver_vtable;
+            driver->sbp.base.comms_vtable          = (const painter_comms_vtable_t *)&ld7032_i2c_comms_vtable;
+            driver->sbp.base.native_bits_per_pixel = 1; // 1bpp mono
+            driver->sbp.base.panel_width           = panel_width;
+            driver->sbp.base.panel_height          = panel_height;
+            driver->sbp.base.rotation              = QP_ROTATION_0;
+            driver->sbp.base.offset_x              = 0;
+            driver->sbp.base.offset_y              = 0;
 
             // I2C configuration
-            driver->oled.base.comms_config  = &driver->i2c_config;
+            driver->sbp.base.comms_config   = &driver->i2c_config;
             driver->i2c_config.chip_address = i2c_address;
 
             if (!qp_internal_register_device((painter_device_t)driver)) {
