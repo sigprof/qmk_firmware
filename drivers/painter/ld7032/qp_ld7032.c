@@ -4,7 +4,9 @@
 
 #include "qp_internal.h"
 #include "qp_comms.h"
-#include "qp_oled_panel.h"
+#include "qp_comms_i2c.h"
+#include "qp_comms_spi.h"
+#include "qp_surface_backed_driver.h"
 #include "qp_ld7032.h"
 #include "qp_ld7032_opcodes.h"
 #include "qp_surface.h"
@@ -156,7 +158,18 @@ void ld7032_flush_90(painter_device_t device, surface_dirty_data_t *dirty, const
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 typedef struct ld7032_device_t {
-    oled_panel_painter_device_t oled;
+    surface_backed_painter_driver_t oled;
+
+    union {
+#ifdef QUANTUM_PAINTER_SPI_ENABLE
+        // SPI-based configurables
+        qp_comms_spi_dc_reset_config_t spi_dc_reset_config;
+#endif // QUANTUM_PAINTER_SPI_ENABLE
+#ifdef QUANTUM_PAINTER_I2C_ENABLE
+        // I2C-based configurables
+        qp_comms_i2c_config_t i2c_config;
+#endif // QUANTUM_PAINTER_I2C_ENABLE
+    };
 
     uint8_t framebuffer[SURFACE_REQUIRED_BUFFER_BYTE_SIZE(128, 40, 1)];
 } ld7032_device_t;
@@ -291,11 +304,11 @@ const painter_driver_vtable_t ld7032_driver_vtable = {
     .power           = qp_ld7032_power,
     .clear           = qp_ld7032_clear,
     .flush           = qp_ld7032_flush,
-    .pixdata         = qp_oled_panel_passthru_pixdata,
-    .viewport        = qp_oled_panel_passthru_viewport,
-    .palette_convert = qp_oled_panel_passthru_palette_convert,
-    .append_pixels   = qp_oled_panel_passthru_append_pixels,
-    .append_pixdata  = qp_oled_panel_passthru_append_pixdata,
+    .pixdata         = qp_surface_backed_passthru_pixdata,
+    .viewport        = qp_surface_backed_passthru_viewport,
+    .palette_convert = qp_surface_backed_passthru_palette_convert,
+    .append_pixels   = qp_surface_backed_passthru_append_pixels,
+    .append_pixdata  = qp_surface_backed_passthru_append_pixdata,
 };
 
 #ifdef QUANTUM_PAINTER_LD7032_SPI_ENABLE
@@ -335,14 +348,14 @@ painter_device_t qp_ld7032_make_spi_device(uint16_t panel_width, uint16_t panel_
             driver->oled.base.offset_y              = 0;
 
             // SPI and other pin configuration
-            driver->oled.base.comms_config                                   = &driver->oled.spi_dc_reset_config;
-            driver->oled.spi_dc_reset_config.spi_config.chip_select_pin      = chip_select_pin;
-            driver->oled.spi_dc_reset_config.spi_config.divisor              = spi_divisor;
-            driver->oled.spi_dc_reset_config.spi_config.lsb_first            = false;
-            driver->oled.spi_dc_reset_config.spi_config.mode                 = spi_mode;
-            driver->oled.spi_dc_reset_config.dc_pin                          = dc_pin;
-            driver->oled.spi_dc_reset_config.reset_pin                       = reset_pin;
-            driver->oled.spi_dc_reset_config.command_params_uses_command_pin = true;
+            driver->oled.base.comms_config                              = &driver->spi_dc_reset_config;
+            driver->spi_dc_reset_config.spi_config.chip_select_pin      = chip_select_pin;
+            driver->spi_dc_reset_config.spi_config.divisor              = spi_divisor;
+            driver->spi_dc_reset_config.spi_config.lsb_first            = false;
+            driver->spi_dc_reset_config.spi_config.mode                 = spi_mode;
+            driver->spi_dc_reset_config.dc_pin                          = dc_pin;
+            driver->spi_dc_reset_config.reset_pin                       = reset_pin;
+            driver->spi_dc_reset_config.command_params_uses_command_pin = true;
 
             if (!qp_internal_register_device((painter_device_t)driver)) {
                 memset(driver, 0, sizeof(ld7032_device_t));
@@ -394,8 +407,8 @@ painter_device_t qp_ld7032_make_i2c_device(uint16_t panel_width, uint16_t panel_
             driver->oled.base.offset_y              = 0;
 
             // I2C configuration
-            driver->oled.base.comms_config       = &driver->oled.i2c_config;
-            driver->oled.i2c_config.chip_address = i2c_address;
+            driver->oled.base.comms_config  = &driver->i2c_config;
+            driver->i2c_config.chip_address = i2c_address;
 
             if (!qp_internal_register_device((painter_device_t)driver)) {
                 memset(driver, 0, sizeof(ld7032_device_t));
