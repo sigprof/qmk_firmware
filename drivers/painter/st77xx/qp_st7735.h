@@ -5,7 +5,7 @@
 #pragma once
 
 #include "gpio.h"
-#include "qp_internal.h"
+#include "qp_init.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Quantum Painter ST7735 configurables (add to your keyboard's config.h)
@@ -23,6 +23,11 @@
 // If you know exactly which offsets should be used on your panel with respect to selected rotation, then this config
 // option allows you to save some flash space -- you'll need to invoke qp_set_viewport_offsets() instead from your keyboard.
 //       #define ST7735_NO_AUTOMATIC_VIEWPORT_OFFSETS
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Quantum Painter ST7735 custom init function
+
+bool qp_st7735_custom_init(painter_device_t device, painter_rotation_t rotation, qp_device_generic_init_sequence_t *init_sequence);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Quantum Painter ST7735 device factories
