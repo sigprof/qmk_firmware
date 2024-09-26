@@ -49,9 +49,13 @@ static inline void st7735_automatic_viewport_offsets(painter_device_t device, pa
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
 
+__attribute__((weak)) bool qp_st7735_custom_init(painter_device_t device, painter_rotation_t rotation, qp_device_generic_init_sequence_t *init_sequence) {
+    return qp_device_generic_init(device, init_sequence);
+}
+
 __attribute__((weak)) bool qp_st7735_init(painter_device_t device, painter_rotation_t rotation) {
     // clang-format off
-    const uint8_t st7735_init_sequence[] = {
+    static const uint8_t st7735_init_sequence[] = {
         // Command,                 Delay, N, Data[N]
         ST77XX_CMD_RESET,            120,  0,
         ST77XX_CMD_SLEEP_OFF,          5,  0,
@@ -60,25 +64,37 @@ __attribute__((weak)) bool qp_st7735_init(painter_device_t device, painter_rotat
         ST77XX_CMD_NORMAL_ON,          0,  0,
         ST7735_SET_PGAMMA,             0, 16, 0x02, 0x1C, 0x07, 0x12, 0x37, 0x32, 0x29, 0x2D, 0x29, 0x25, 0x2B, 0x39, 0x00, 0x01, 0x03, 0x10,
         ST7735_SET_NGAMMA,             0, 16, 0x03, 0x1D, 0x07, 0x06, 0x2E, 0x2C, 0x29, 0x2D, 0x2E, 0x2E, 0x37, 0x3F, 0x00, 0x00, 0x02, 0x10,
+    };
+    static const uint8_t st7735_enable_sequence[] = {
         ST77XX_CMD_DISPLAY_ON,        20,  0
     };
     // clang-format on
-    qp_comms_bulk_command_sequence(device, st7735_init_sequence, sizeof(st7735_init_sequence));
 
     // Configure the rotation (i.e. the ordering and direction of memory writes in GRAM)
-    const uint8_t madctl[] = {
+    static const uint8_t madctl[] = {
         [QP_ROTATION_0]   = ST77XX_MADCTL_BGR,
         [QP_ROTATION_90]  = ST77XX_MADCTL_BGR | ST77XX_MADCTL_MX | ST77XX_MADCTL_MV,
         [QP_ROTATION_180] = ST77XX_MADCTL_BGR | ST77XX_MADCTL_MX | ST77XX_MADCTL_MY,
         [QP_ROTATION_270] = ST77XX_MADCTL_BGR | ST77XX_MADCTL_MV | ST77XX_MADCTL_MY,
     };
-    qp_comms_command_databyte(device, ST77XX_SET_MADCTL, madctl[rotation]);
+
+    // clang-format off
+    uint8_t st7735_configure_sequence[] = {
+        ST77XX_SET_MADCTL,             0,  1, madctl[rotation]
+    };
+    // clang-format on
+
+    qp_device_generic_init_sequence_t sequence = {
+        .init      = {.data = st7735_init_sequence, .size = sizeof(st7735_init_sequence)},
+        .enable    = {.data = st7735_enable_sequence, .size = sizeof(st7735_enable_sequence)},
+        .configure = {.data = st7735_configure_sequence, .size = sizeof(st7735_configure_sequence)},
+    };
 
 #ifndef ST7735_NO_AUTOMATIC_VIEWPORT_OFFSETS
     st7735_automatic_viewport_offsets(device, rotation);
 #endif // ST7735_NO_AUTOMATIC_VIEWPORT_OFFSETS
 
-    return true;
+    return qp_st7735_custom_init(device, rotation, &sequence);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
