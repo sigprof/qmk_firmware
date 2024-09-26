@@ -20,6 +20,10 @@ static st75xx_device_t st75xx_drivers[ST7567S_NUM_DEVICES] = {0};
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Quantum Painter API implementations
 
+__attribute__((weak)) bool qp_st7567s_custom_init(painter_device_t device, painter_rotation_t rotation, qp_device_generic_init_sequence_t *init_sequence) {
+    return qp_device_generic_init(device, init_sequence);
+}
+
 // Initialisation
 __attribute__((weak)) bool qp_st7567s_init(painter_device_t device, painter_rotation_t rotation) {
     st75xx_device_t *driver = (st75xx_device_t *)device;
@@ -40,8 +44,8 @@ __attribute__((weak)) bool qp_st7567s_init(painter_device_t device, painter_rota
     }
 
     // clang-format off
-    uint8_t st7567s_init_sequence[] = {
-        // Command,                 Delay,  N, Data[N]
+    static const uint8_t st7567s_init_sequence[] = {
+        // Command,                       Delay,  N, Data[N]
         ST75XX_RESET,                        10,  0,
         ST75XX_BIAS_LOW,                      0,  0,
         ST75XX_SEG_SCAN_DIR_NORMAL,           0,  0,
@@ -54,12 +58,17 @@ __attribute__((weak)) bool qp_st7567s_init(painter_device_t device, painter_rota
         ST75XX_DISPLAY_START_LINE,            0,  0,
         ST75XX_ALL_ON_RESUME,                 0,  0,
         ST75XX_NON_INVERTING_DISPLAY,         0,  0,
+    };
+    static const uint8_t st7567s_enable_sequence[] = {
         ST75XX_DISPLAY_ON,                    0,  0,
     };
     // clang-format on
 
-    qp_comms_bulk_command_sequence(device, st7567s_init_sequence, sizeof(st7567s_init_sequence));
-    return true;
+    qp_device_generic_init_sequence_t init_sequence = {
+        .init   = {.data = st7567s_init_sequence, .size = sizeof(st7567s_init_sequence)},
+        .enable = {.data = st7567s_enable_sequence, .size = sizeof(st7567s_enable_sequence)},
+    };
+    return qp_st7567s_custom_init(device, rotation, &init_sequence);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
