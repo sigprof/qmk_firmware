@@ -54,6 +54,7 @@ typedef struct oled_panel_painter_device_t {
 
 bool qp_oled_panel_power(painter_device_t device, bool power_on);
 bool qp_oled_panel_clear(painter_device_t device);
+bool qp_oled_panel_page_column_flush(painter_device_t device);
 
 bool qp_oled_panel_passthru_pixdata(painter_device_t device, const void *pixel_data, uint32_t native_pixel_count);
 bool qp_oled_panel_passthru_viewport(painter_device_t device, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom);
