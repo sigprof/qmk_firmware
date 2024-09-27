@@ -6,7 +6,6 @@
 #include "qp_comms.h"
 #include "qp_oled_panel.h"
 #include "qp_st7567s.h"
-#include "qp_st75xx_internal.h"
 #include "qp_st75xx_opcodes.h"
 #include "qp_surface.h"
 #include "qp_surface_internal.h"
@@ -15,7 +14,13 @@
 // Driver storage
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static st75xx_device_t st75xx_drivers[ST7567S_NUM_DEVICES] = {0};
+typedef struct st7567s_device_t {
+    oled_panel_painter_device_t oled;
+
+    uint8_t framebuffer[SURFACE_REQUIRED_BUFFER_BYTE_SIZE(132, 64, 1)];
+} st7567s_device_t;
+
+static st7567s_device_t st7567s_drivers[ST7567S_NUM_DEVICES] = {0};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Quantum Painter API implementations
@@ -26,7 +31,7 @@ __attribute__((weak)) bool qp_st7567s_custom_init(painter_device_t device, paint
 
 // Initialisation
 __attribute__((weak)) bool qp_st7567s_init(painter_device_t device, painter_rotation_t rotation) {
-    st75xx_device_t *driver = (st75xx_device_t *)device;
+    st7567s_device_t *driver = (st7567s_device_t *)device;
 
     // Change the surface geometry based on the panel rotation
     if (rotation == QP_ROTATION_90 || rotation == QP_ROTATION_270) {
@@ -81,7 +86,7 @@ const oled_panel_painter_driver_vtable_t st7567s_driver_vtable = {
             .init            = qp_st7567s_init,
             .power           = qp_oled_panel_power,
             .clear           = qp_oled_panel_clear,
-            .flush           = qp_st75xx_flush,
+            .flush           = qp_oled_panel_page_column_flush,
             .pixdata         = qp_oled_panel_passthru_pixdata,
             .viewport        = qp_oled_panel_passthru_viewport,
             .palette_convert = qp_oled_panel_passthru_palette_convert,
@@ -102,7 +107,7 @@ const oled_panel_painter_driver_vtable_t st7567s_driver_vtable = {
 // Factory function for creating a handle to the ST7567S device
 painter_device_t qp_st7567s_make_spi_device(uint16_t panel_width, uint16_t panel_height, pin_t chip_select_pin, pin_t dc_pin, pin_t reset_pin, uint16_t spi_divisor, int spi_mode) {
     for (uint32_t i = 0; i < ST7567S_NUM_DEVICES; ++i) {
-        st75xx_device_t *driver = &st75xx_drivers[i];
+        st7567s_device_t *driver = &st7567s_drivers[i];
         if (!driver->oled.base.driver_vtable) {
             painter_device_t surface = qp_make_mono1bpp_surface_advanced(&driver->oled.surface, 1, panel_width, panel_height, driver->framebuffer);
             if (!surface) {
@@ -130,7 +135,7 @@ painter_device_t qp_st7567s_make_spi_device(uint16_t panel_width, uint16_t panel
             driver->oled.spi_dc_reset_config.command_params_uses_command_pin = true;
 
             if (!qp_internal_register_device((painter_device_t)driver)) {
-                memset(driver, 0, sizeof(st75xx_device_t));
+                memset(driver, 0, sizeof(st7567s_device_t));
                 return NULL;
             }
 
@@ -146,7 +151,7 @@ painter_device_t qp_st7567s_make_spi_device(uint16_t panel_width, uint16_t panel
 // Factory function for creating a handle to the ST7567S device
 painter_device_t qp_st7567s_make_i2c_device(uint16_t panel_width, uint16_t panel_height, uint8_t i2c_address) {
     for (uint32_t i = 0; i < ST7567S_NUM_DEVICES; ++i) {
-        st75xx_device_t *driver = &st75xx_drivers[i];
+        st7567s_device_t *driver = &st7567s_drivers[i];
         if (!driver->oled.base.driver_vtable) {
             // Instantiate the surface, intentional swap of width/high due to transpose
             painter_device_t surface = qp_make_mono1bpp_surface_advanced(&driver->oled.surface, 1, panel_width, panel_height, driver->framebuffer);
@@ -169,7 +174,7 @@ painter_device_t qp_st7567s_make_i2c_device(uint16_t panel_width, uint16_t panel
             driver->oled.i2c_config.chip_address = i2c_address;
 
             if (!qp_internal_register_device((painter_device_t)driver)) {
-                memset(driver, 0, sizeof(st75xx_device_t));
+                memset(driver, 0, sizeof(st7567s_device_t));
                 return NULL;
             }
 

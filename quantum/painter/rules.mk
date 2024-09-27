@@ -119,7 +119,6 @@ define handle_quantum_painter_driver
             $(DRIVER_PATH)/painter/st75xx
         SRC += \
             $(DRIVER_PATH)/painter/oled_panel/qp_oled_panel.c \
-            $(DRIVER_PATH)/painter/st75xx/qp_st75xx.c \
             $(DRIVER_PATH)/painter/st75xx/qp_st7567s.c
 
     else ifeq ($$(strip $$(CURRENT_PAINTER_DRIVER)),st7567s_i2c)
@@ -131,7 +130,6 @@ define handle_quantum_painter_driver
             $(DRIVER_PATH)/painter/st75xx
         SRC += \
             $(DRIVER_PATH)/painter/oled_panel/qp_oled_panel.c \
-            $(DRIVER_PATH)/painter/st75xx/qp_st75xx.c \
             $(DRIVER_PATH)/painter/st75xx/qp_st7567s.c
 
     else ifeq ($$(strip $$(CURRENT_PAINTER_DRIVER)),st7735_spi)
