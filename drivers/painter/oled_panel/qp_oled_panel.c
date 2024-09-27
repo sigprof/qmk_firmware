@@ -193,3 +193,32 @@ void qp_oled_panel_page_column_flush_rot270(painter_device_t device, surface_dir
         qp_comms_send(device, column_data, cols_required);
     }
 }
+
+bool qp_oled_panel_page_column_flush(painter_device_t device) {
+    oled_panel_painter_device_t *driver = (oled_panel_painter_device_t *)device;
+
+    if (!driver->surface.dirty.is_dirty) {
+        return true;
+    }
+
+    switch (driver->base.rotation) {
+        default:
+        case QP_ROTATION_0:
+            qp_oled_panel_page_column_flush_rot0(device, &driver->surface.dirty, driver->surface.u8buffer);
+            break;
+        case QP_ROTATION_90:
+            qp_oled_panel_page_column_flush_rot90(device, &driver->surface.dirty, driver->surface.u8buffer);
+            break;
+        case QP_ROTATION_180:
+            qp_oled_panel_page_column_flush_rot180(device, &driver->surface.dirty, driver->surface.u8buffer);
+            break;
+        case QP_ROTATION_270:
+            qp_oled_panel_page_column_flush_rot270(device, &driver->surface.dirty, driver->surface.u8buffer);
+            break;
+    }
+
+    // Clear the dirty area
+    qp_flush(&driver->surface);
+
+    return true;
+}

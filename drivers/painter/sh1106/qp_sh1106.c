@@ -75,36 +75,6 @@ __attribute__((weak)) bool qp_sh1106_init(painter_device_t device, painter_rotat
     return true;
 }
 
-// Screen flush
-bool qp_sh1106_flush(painter_device_t device) {
-    sh1106_device_t *driver = (sh1106_device_t *)device;
-
-    if (!driver->oled.surface.dirty.is_dirty) {
-        return true;
-    }
-
-    switch (driver->oled.base.rotation) {
-        default:
-        case QP_ROTATION_0:
-            qp_oled_panel_page_column_flush_rot0(device, &driver->oled.surface.dirty, driver->framebuffer);
-            break;
-        case QP_ROTATION_90:
-            qp_oled_panel_page_column_flush_rot90(device, &driver->oled.surface.dirty, driver->framebuffer);
-            break;
-        case QP_ROTATION_180:
-            qp_oled_panel_page_column_flush_rot180(device, &driver->oled.surface.dirty, driver->framebuffer);
-            break;
-        case QP_ROTATION_270:
-            qp_oled_panel_page_column_flush_rot270(device, &driver->oled.surface.dirty, driver->framebuffer);
-            break;
-    }
-
-    // Clear the dirty area
-    qp_flush(&driver->oled.surface);
-
-    return true;
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Driver vtable
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -115,7 +85,7 @@ const oled_panel_painter_driver_vtable_t sh1106_driver_vtable = {
             .init            = qp_sh1106_init,
             .power           = qp_oled_panel_power,
             .clear           = qp_oled_panel_clear,
-            .flush           = qp_sh1106_flush,
+            .flush           = qp_oled_panel_page_column_flush,
             .pixdata         = qp_oled_panel_passthru_pixdata,
             .viewport        = qp_oled_panel_passthru_viewport,
             .palette_convert = qp_oled_panel_passthru_palette_convert,
