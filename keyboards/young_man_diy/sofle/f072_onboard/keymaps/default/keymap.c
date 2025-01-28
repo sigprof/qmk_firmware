@@ -1,5 +1,12 @@
 #include QMK_KEYBOARD_H
 
+enum Layers {
+  _BASE,
+  _LOWER,
+  _RAISE,
+  _ADJUST,
+};
+
 #ifdef OLED_ENABLE
 static void render_logo(void) {
     static const char PROGMEM qmk_logo[] = {
@@ -13,20 +20,28 @@ static void render_logo(void) {
 
 static void render_status(void) {
   // Host Keyboard Layer Status
+  oled_write_P(PSTR("Layer\n"), false);
+  oled_write_P(PSTR("-----\n"), false);
   switch (get_highest_layer(layer_state)) {
-  case 0:
+  case _BASE:
     oled_write_P(PSTR("Base \n"), false);
     break;
-  case 1:
+  case _LOWER:
     oled_write_P(PSTR("Lower\n"), false);
     break;
-  case 2:
+  case _RAISE:
     oled_write_P(PSTR("Raise\n"), false);
+    break;
+  case _ADJUST:
+    oled_write_P(PSTR("Adjust\n"), false);
     break;
   default:
     oled_write_P(PSTR("Undef\n"), false);
   }
-  oled_write_P(PSTR("Layer\n"), false);
+}
+
+oled_rotation_t oled_init_user(oled_rotation_t rotation) {
+  return OLED_ROTATION_270;
 }
 
 bool oled_task_kb(void) {
@@ -34,12 +49,12 @@ bool oled_task_kb(void) {
 		return false;
 	}
 
-    if (is_keyboard_master()) {
-        render_status(); // Renders the current keyboard state (layer, lock, caps, scroll, etc)
-    } else {
-        render_logo();
-    }
+  if (is_keyboard_master()) {
+      render_status(); // Renders the current keyboard state (layer, lock, caps, scroll, etc)
+  } else {
+      render_logo();
+  }
 
-    return true;
+  return true;
 }
 #endif
