@@ -10,6 +10,8 @@
         ]
     },
     "features": {
+        "console": true,
+        "debug": true,
         "bootmagic": true,
         "encoder": true,
         "extrakey": true,
@@ -25,6 +27,20 @@
     "processor": "STM32F072",
     "rgb_matrix": {
         "driver": "ws2812",
+        "default": {
+            "animation": "breathing",
+            "hue": 152,
+            "sat": 232,
+            "speed": 50
+        },
+        "animations": {
+            "band_sat": true,
+            "band_spiral_val": true,
+            "breathing": true,
+            "cycle_all": true,
+            "cycle_left_right": true,
+            "raindrops": true
+        },
         "layout": [
             {"x": 96, "y": 40, "flags": 8},
             {"x": 16, "y": 20, "flags": 2},
@@ -102,11 +118,6 @@
         "sleep": true,
         "split_count": [36, 36]
     },
-    "rgblight": {
-        "led_count": 72,
-        "sleep": true,
-        "split_count": [36, 36]
-    },
     "split": {
         "enabled": true,
         "matrix_pins": {
@@ -121,7 +132,10 @@
         },
         "transport": {
             "sync": {
-                "matrix_state": true
+                "matrix_state": true,
+                "oled": true,
+                "modifiers": true,
+                "wpm": true
             },
             "watchdog": true
         }
